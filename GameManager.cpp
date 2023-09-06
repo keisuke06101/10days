@@ -4,6 +4,17 @@ void GameManager::Initialize()
 {
 	mapCountX = sizeof(map0[0]) / sizeof(map0[0][0]);
 	mapCountY = sizeof(map0) / sizeof(map0[0]);
+
+	back = Novice::LoadTexture("./Resource/images/floor.png");                      //背景
+	wall = Novice::LoadTexture("./Resource/images/metaru.png");                     //壁
+
+	for (int y = 0; y < mapCountY; y++) {
+		for (int x = 0; x < mapCountX; x++) {
+
+			backColor_[y][x] = WHITE;
+
+		}
+	}
 }
 
 void GameManager::Update()

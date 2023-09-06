@@ -38,6 +38,12 @@
     <ClCompile Include="GameManager.cpp">
       <Filter>KamataEngine</Filter>
     </ClCompile>
+    <ClCompile Include="SceneManager.cpp">
+      <Filter>KamataEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Title.cpp">
+      <Filter>KamataEngine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="C:\KamataEngine\DirectXGame\audio\Audio.h">
@@ -110,6 +116,8 @@
     <ClInclude Include="C:\KamataEngine\DirectXGame\2d\ImGuiManager.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="GameManager.h" />
+    <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="Title.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="10days.rc" />

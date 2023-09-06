@@ -1,5 +1,6 @@
 #include <Novice.h>
 #include "GameManager.h"
+#include "SceneManager.h"
 
 const char kWindowTitle[] = "GC2A_16_タナカケイスケ";
 
@@ -16,6 +17,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	GameManager* gameManager = new GameManager;
 	gameManager->Initialize();
 
+	SceneManager* sceneManager = new SceneManager;
+	sceneManager->Initialize();
+
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -28,7 +32,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 		/// ↓更新処理ここから
 		///
-		gameManager->Update();
+		
+		//gameManager->Update();
+
+		sceneManager->Update(keys, preKeys);
+
 		///
 		/// ↑更新処理ここまで
 		///
@@ -36,7 +44,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 		/// ↓描画処理ここから
 		///
-		gameManager->Draw();
+		
+		//gameManager->Draw();
+
+		sceneManager->Draw();
+
 		///
 		/// ↑描画処理ここまで
 		///
