@@ -50,7 +50,7 @@ void SceneManager::Update(char* keys, char* preKeys)
 
 	case Game:
 		
-		gameManager_->Update(stageSelect_->GetStageNo());
+		gameManager_->Update(stageSelect_->GetStageNo(), keys);
 
 		if (keys[DIK_BACKSPACE] && preKeys[DIK_BACKSPACE] == 0) {
 			stageSelect_->Initialize();
