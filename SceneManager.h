@@ -1,8 +1,14 @@
 ﻿#include "Input.h"
 #include "GameManager.h"
+#include "Title.h"
+#include "StageSelect.h"
 #include <Novice.h>
 
 #pragma once
+
+// 前方宣言（ステージセレクト）
+class StageSelect;
+
 class SceneManager
 {
 public:
@@ -18,8 +24,8 @@ public:
 private:
 
 	enum scene {
-		Title,
-		StageSelect,
+		TitleScene,
+		StageSelectScene,
 		Game,
 		GameClear,
 		GameOver
@@ -27,9 +33,13 @@ private:
 
 	int sceneNo_ = 0;
 
-	Input* input_ = nullptr;
-
+	// ゲーム管理
 	GameManager* gameManager_ = nullptr;
 
+	// タイトル管理
+	Title* title_ = nullptr;
+
+	// ステージセレクト管理
+	StageSelect* stageSelect_ = nullptr;
 };
 

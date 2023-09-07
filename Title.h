@@ -1,4 +1,4 @@
-#include <Novice.h>
+ï»¿#include <Novice.h>
 
 #pragma once
 class Title
@@ -10,24 +10,26 @@ public:
 
 	void Draw();
 
+	bool GetIsStart() { return isStart_; }
+
 private:
 
-	//ƒXƒ^[ƒgƒZƒŒƒNƒgƒ{ƒbƒNƒXiƒQ[ƒ€ŠJn‚Ì‚½‚ß‚Ìj
-	float selectStartX_ = 430;
-	float selectStartY_ = 500;
+	//ã‚¹ã‚¿ãƒ¼ãƒˆã‚»ãƒ¬ã‚¯ãƒˆãƒœãƒƒã‚¯ã‚¹ï¼ˆã‚²ãƒ¼ãƒ é–‹å§‹ã®ãŸã‚ã®ï¼‰
+	int selectStartX_ = 430;
+	int selectStartY_ = 500;
 	float selectStartH_ = 100;
 	float selectStartW_ = 420;
 	int selectStartColor_ = WHITE;
 
-	// ƒ}ƒEƒXƒ|ƒWƒVƒ‡ƒ“
+	// ãƒã‚¦ã‚¹ãƒã‚¸ã‚·ãƒ§ãƒ³
 	int mousePosX_ = 0;
 	int mousePosY_ = 0;
 
-	// ƒeƒNƒXƒ`ƒƒ
+	// ãƒ†ã‚¯ã‚¹ãƒãƒ£
 	int title_ = 0;
 	int start_ = 0;
 
-	// ƒtƒ‰ƒO
+	// ãƒ•ãƒ©ã‚°
 	bool isStart_ = 0;
 
 };
