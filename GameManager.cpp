@@ -1445,6 +1445,11 @@ void GameManager::Draw(int stageNo)
 	Novice::ScreenPrintf(1000, 0, "map[%d][%d]", leftTY, leftTX);
 	Novice::ScreenPrintf(1000, 20, "saveMap[%d][%d]", saveLeftTY, saveLeftTX);
 
+	Novice::ScreenPrintf(1000, 40, "laserMove : %d", shotMove_);
+	Novice::ScreenPrintf(1000, 60, "colision : %d", collisionFlag_);
+	Novice::ScreenPrintf(1000, 80, "click : %d", clickFlag_);
+	Novice::ScreenPrintf(1000, 100, "LEFT,RIGHT,DOWN,UP");
+
 	for (int i = 0; i < 4; i++) {
 		Novice::DrawBox(selectWX_[i], selectWY_[i], selectWR_[i], selectWR_[i], 0.f, selectWColor_[i], kFillModeSolid);
 		Novice::DrawSprite(selectWX_[i], selectWY_[i], wall, 2, 2, 0, selectWColor_[i]);
