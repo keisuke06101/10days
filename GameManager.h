@@ -1,4 +1,5 @@
 ﻿#include <Novice.h>
+#include "GameClear.h"
 
 #pragma once
 class GameManager
@@ -10,6 +11,13 @@ public:
 	void Update(int stageNo, char keys[256]);
 
 	void Draw(int stageNo);
+
+	void MapReset();
+
+	GameClear* GetGameClear()
+	{
+		return gameClear_;
+	}
 
 private:
 
@@ -41,7 +49,7 @@ private:
 	int map0[12][15] = {
 	  {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},  // 0
 	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 1
-	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 2
+	  {2,0,0,0,0,0,0,0,0,0,0,0,8,0,2},  // 2
 	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 3
 	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 4
 	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 5
@@ -55,9 +63,9 @@ private:
 
 	int initializeMap0[12][15] = {
 	  {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},  // 0
-	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 1
-	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 2
-	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 3
+	  {2,0,0,0,0,0,0,0,0,0,0,0,2,2,2},  // 1
+	  {2,0,0,0,0,0,0,0,0,0,0,0,8,2,2},  // 2
+	  {2,0,0,0,0,0,0,0,0,0,0,0,2,2,2},  // 3
 	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 4
 	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 5
 	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 6
@@ -136,15 +144,16 @@ private:
 		RIGHT,    // 4 右
 		LEFT,    // 5 左
 		DOWN,    // 6 下
-		CLEAR
+		CLEAR,
+		ENEMY
 	};
 
 	// マウス
 	int mousePosX_ = 0;
 	int mousePosY_ = 0;
 
-    // 選択ボックス(仮)
-    int selectWX_[4];
+	// 選択ボックス(仮)
+	int selectWX_[4];
 	int selectWY_[4];
 	int selectWR_[4];
 	int selectWColor_[4];
@@ -172,6 +181,16 @@ private:
 	int collisionFlag_;//判定をとるフラグ
 	int setShotFlag_;//打つまでのフラグ
 
+	// エフェクト変数と敵
+	int judgeFlag_ = 0;
+	int deadFlag_ = 0;
+	int efectPosX_[20];
+	int efectPosY_[20];
+	int efectTimer_;
+	int efectFlag_[20];
+	int saveFlag_[20];
+	int Timer_[20];
+
 	// フラグ
 	bool isWall[4];
 	int clickFlag_;
@@ -181,5 +200,18 @@ private:
 	int back = 0;
 	int wall = 0;
 
-};
+	int player = Novice::LoadTexture("./Resource/images/player.png");
+	int enemy = Novice::LoadTexture("./Resource/images/enemy.png");
 
+	int vertical = Novice::LoadTexture("./Resource/images/vertical.png");
+	int side = Novice::LoadTexture("./Resource/images/side.png");
+
+	int up = Novice::LoadTexture("./Resource/images/up.png");
+	int down = Novice::LoadTexture("./Resource/images/down.png");
+	int right = Novice::LoadTexture("./Resource/images/right.png");
+	int left = Novice::LoadTexture("./Resource/images/left.png");
+
+	int panel = Novice::LoadTexture("./Resource/images/panel.png");
+
+	GameClear* gameClear_ = nullptr;
+};

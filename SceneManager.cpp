@@ -33,6 +33,7 @@ void SceneManager::Update(char* keys, char* preKeys)
 		if (title_->GetIsStart() == true)
 		{
 			sceneNo_ = StageSelectScene;
+			gameManager_->Initialize();
 			
 		}
 		break;
@@ -40,6 +41,7 @@ void SceneManager::Update(char* keys, char* preKeys)
 	case StageSelectScene:
 
 		stageSelect_->Update();
+		gameManager_->GetGameClear()->Update(gameManager_->GetGameClear()->GetFIn());
 		if (stageSelect_->IsGameStart() == true)
 		{
 			gameManager_->Initialize();
@@ -51,17 +53,27 @@ void SceneManager::Update(char* keys, char* preKeys)
 	case Game:
 		
 		gameManager_->Update(stageSelect_->GetStageNo(), keys);
+		gameManager_->GetGameClear()->Update(gameManager_->GetGameClear()->GetFIn());
 
-		if (keys[DIK_BACKSPACE] && preKeys[DIK_BACKSPACE] == 0) {
-			stageSelect_->Initialize();
+		if (gameManager_->GetGameClear()->SelectR() && gameManager_->GetGameClear()->IsSceneChange()) {
 			sceneNo_ = StageSelectScene;
+			stageSelect_->Initialize();
+			gameManager_->GetGameClear()->Initialize();
 		}
 
+		if (gameManager_->GetGameClear()->SelectL() && gameManager_->GetGameClear()->GetRad() >= 1400) {
+			gameManager_->MapReset();
+		}
+		if (gameManager_->GetGameClear()->IsSceneChange() && gameManager_->GetGameClear()->GetRad() <= 0 && gameManager_->GetGameClear()->SelectL())
+		{
+			gameManager_->GetGameClear()->Initialize();
+		}
+		
 		break;
-	case GameClear:
+	case GameClearScene:
 
 		break;
-	case GameOver:
+	case GameOverScene:
 
 		if (keys[DIK_BACKSPACE] && preKeys[DIK_BACKSPACE] == 0) {
 			sceneNo_ = Game;
@@ -87,6 +99,8 @@ void SceneManager::Draw()
 		
 		stageSelect_->Draw();
 
+		gameManager_->GetGameClear()->Draw();
+
 		break;
 
 
@@ -94,13 +108,18 @@ void SceneManager::Draw()
 
 		gameManager_->Draw(stageSelect_->GetStageNo());
 
-		break;
-	case GameClear:
+		gameManager_->GetGameClear()->Draw();
 
 		break;
-	case GameOver:
+
+	case GameClearScene:
+
+		break;
+
+	case GameOverScene:
 		
 		break;
+
 	default:
 		break;
 	}

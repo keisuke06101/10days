@@ -37,11 +37,11 @@ void GameManager::Initialize()
 		rightTY[i] = 0;
 		rightBX[i] = 0;
 		rightBY[i] = 0;
-		selectWX_[i] = 1000;
-		selectWY_[0] = 260;
-		selectWY_[1] = 320;
-		selectWY_[2] = 380;
-		selectWY_[3] = 440;
+		selectWX_[i] = 1085;
+		selectWY_[0] = 165;
+		selectWY_[1] = 330;
+		selectWY_[2] = 485;
+		selectWY_[3] = 650;
 		selectWR_[i] = 64;
 		selectWColor_[i] = 0;
 		saveLeftTX[i] = 0;
@@ -50,9 +50,22 @@ void GameManager::Initialize()
 		clickFlag_ = 0;
 	}
 
+	efectTimer_ = 0;
+	for (int i = 0; i < 20; i++) {
+		efectPosX_[i] = 0;
+		efectPosY_[i] = 0;
+		efectFlag_[i] = 0;
+		saveFlag_[i] = 0;
+		Timer_[i] = 0;
+	}
+
 	// テクスチャ
 	back = Novice::LoadTexture("./Resource/images/floor.png");                      //背景
 	wall = Novice::LoadTexture("./Resource/images/metaru.png");                     //壁
+
+	gameClear_ = new GameClear;
+	gameClear_->Initialize();
+
 }
 
 void GameManager::Update(int stageNo, char keys[256])
@@ -91,7 +104,7 @@ void GameManager::Update(int stageNo, char keys[256])
 	}
 	else
 	{
-		selectWColor_[0] = 0x00FFFFFF;
+		selectWColor_[0] = WHITE;
 	}
 	if (clickFlag_ == 0) {
 		if (selectWColor_[0] == RED && Novice::IsPressMouse(0))
@@ -106,9 +119,66 @@ void GameManager::Update(int stageNo, char keys[256])
 		selectWY_[0] = mousePosY_;
 	}
 
+
+	if (map0[leftTopY_][leftTopX_] == ENEMY || map0[rightTopY_][rightTopX_] == ENEMY) {
+		judgeFlag_ = 1;
+		deadFlag_ = 1;
+		shotFlag_ = 0;
+	}
+	else {
+		judgeFlag_ = 0;
+	}
+
 	// ステージ1
 	if (stageNo == STAGE1)
 	{
+		//ステージ外
+		for (int i = 0; i < 8; i++) {
+			if (deadFlag_ == 1) {
+				if (efectTimer_ <= 50) {
+					efectTimer_ += 1;
+				}
+				if (efectTimer_ >= 50) {
+					if (efectFlag_[i] == 1) {
+
+						if (Timer_[i] <= 10) {
+							Timer_[i] += 1;
+							efectPosX_[0] += 1;
+							efectPosX_[1] -= 1;
+							efectPosY_[2] += 1;
+							efectPosY_[3] -= 1;
+
+							efectPosX_[4] += 1;
+							efectPosY_[4] += 1;
+							efectPosX_[5] -= 1;
+							efectPosY_[5] -= 1;
+							efectPosX_[6] -= 1;
+							efectPosY_[6] += 1;
+							efectPosX_[7] += 1;
+							efectPosY_[7] -= 1;
+						}
+						if (Timer_[i] >= 10) {
+							efectFlag_[i] = 0;
+							Timer_[i] = 0;
+
+						}
+					}
+					else {
+						efectFlag_[i] = 1;
+						efectTimer_ = 0;
+						for (int y = 0; y < mapCountY; y++) {
+							for (int x = 0; x < mapCountX; x++) {
+								if (map0[y][x] == ENEMY) {
+									efectPosX_[i] = x * Size;
+									efectPosY_[i] = y * Size;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
 		// プレイヤー操作
 		for (int y = 0; y < mapCountY; y++) {
 			for (int x = 0; x < mapCountX; x++) {
@@ -366,8 +436,8 @@ void GameManager::Update(int stageNo, char keys[256])
 			map0[leftTY[0]][leftTX[0]] = LEFT;
 			isWall[0] = false;
 			clickFlag_ = 0;
-			selectWX_[0] = 1000;
-			selectWY_[0] = 260;
+			selectWX_[0] = 1085;
+			selectWY_[0] = 165;
 		}
 
 		//右ブロック
@@ -378,7 +448,7 @@ void GameManager::Update(int stageNo, char keys[256])
 		}
 		else
 		{
-			selectWColor_[1] = 0xFF00FFFF;
+			selectWColor_[1] = WHITE;
 		}
 		if (clickFlag_ == 0) {
 			if (selectWColor_[1] == RED && Novice::IsPressMouse(0))
@@ -406,8 +476,8 @@ void GameManager::Update(int stageNo, char keys[256])
 			map0[leftTY[1]][leftTX[1]] = RIGHT;
 			isWall[1] = false;
 			clickFlag_ = 0;
-			selectWX_[1] = 1000;
-			selectWY_[1] = 320;
+			selectWX_[1] = 1085;
+			selectWY_[1] = 330;
 		}
 
 
@@ -419,7 +489,7 @@ void GameManager::Update(int stageNo, char keys[256])
 		}
 		else
 		{
-			selectWColor_[2] = 0xCC00FFFF;
+			selectWColor_[2] = WHITE;
 		}
 		if (clickFlag_ == 0) {
 			if (selectWColor_[2] == RED && Novice::IsPressMouse(0))
@@ -447,8 +517,8 @@ void GameManager::Update(int stageNo, char keys[256])
 			map0[leftTY[2]][leftTX[2]] = DOWN;
 			isWall[2] = false;
 			clickFlag_ = 0;
-			selectWX_[2] = 1000;
-			selectWY_[2] = 380;
+			selectWX_[2] = 1085;
+			selectWY_[2] = 485;
 		}
 
 		//上ブロック
@@ -459,7 +529,7 @@ void GameManager::Update(int stageNo, char keys[256])
 		}
 		else
 		{
-			selectWColor_[3] = BLUE;
+			selectWColor_[3] = WHITE;
 		}
 		if (clickFlag_ == 0) {
 			if (selectWColor_[3] == RED && Novice::IsPressMouse(0))
@@ -487,14 +557,61 @@ void GameManager::Update(int stageNo, char keys[256])
 			map0[leftTY[3]][leftTX[3]] = UP;
 			isWall[3] = false;
 			clickFlag_ = 0;
-			selectWX_[3] = 1000;
-			selectWY_[3] = 440;
+			selectWX_[3] = 1085;
+			selectWY_[3] = 650;
 		}
 	}
 
 	// ステージ2
 	if (stageNo == STAGE2)
 	{
+		//ステージ外
+		for (int i = 0; i < 8; i++) {
+			if (deadFlag_ == 1) {
+				if (efectTimer_ <= 50) {
+					efectTimer_ += 1;
+				}
+				if (efectTimer_ >= 50) {
+					if (efectFlag_[i] == 1) {
+
+						if (Timer_[i] <= 10) {
+							Timer_[i] += 1;
+							efectPosX_[0] += 1;
+							efectPosX_[1] -= 1;
+							efectPosY_[2] += 1;
+							efectPosY_[3] -= 1;
+
+							efectPosX_[4] += 1;
+							efectPosY_[4] += 1;
+							efectPosX_[5] -= 1;
+							efectPosY_[5] -= 1;
+							efectPosX_[6] -= 1;
+							efectPosY_[6] += 1;
+							efectPosX_[7] += 1;
+							efectPosY_[7] -= 1;
+						}
+						if (Timer_[i] >= 10) {
+							efectFlag_[i] = 0;
+							Timer_[i] = 0;
+
+						}
+					}
+					else {
+						efectFlag_[i] = 1;
+						efectTimer_ = 0;
+						for (int y = 0; y < mapCountY; y++) {
+							for (int x = 0; x < mapCountX; x++) {
+								if (map1[y][x] == ENEMY) {
+									efectPosX_[i] = x * Size;
+									efectPosY_[i] = y * Size;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
 		// プレイヤー操作
 		for (int y = 0; y < mapCountY; y++) {
 			for (int x = 0; x < mapCountX; x++) {
@@ -752,8 +869,8 @@ void GameManager::Update(int stageNo, char keys[256])
 			map1[leftTY[0]][leftTX[0]] = LEFT;
 			isWall[0] = false;
 			clickFlag_ = 0;
-			selectWX_[0] = 1000;
-			selectWY_[0] = 260;
+			selectWX_[0] = 1085;
+			selectWY_[0] = 165;
 		}
 
 		//右ブロック
@@ -792,8 +909,8 @@ void GameManager::Update(int stageNo, char keys[256])
 			map0[leftTY[1]][leftTX[1]] = RIGHT;
 			isWall[1] = false;
 			clickFlag_ = 0;
-			selectWX_[1] = 1000;
-			selectWY_[1] = 320;
+			selectWX_[1] = 1085;
+			selectWY_[1] = 330;
 		}
 
 
@@ -833,8 +950,8 @@ void GameManager::Update(int stageNo, char keys[256])
 			map1[leftTY[2]][leftTX[2]] = DOWN;
 			isWall[2] = false;
 			clickFlag_ = 0;
-			selectWX_[2] = 1000;
-			selectWY_[2] = 380;
+			selectWX_[2] = 1085;
+			selectWY_[2] = 485;
 		}
 
 		//上ブロック
@@ -873,14 +990,61 @@ void GameManager::Update(int stageNo, char keys[256])
 			map1[leftTY[3]][leftTX[3]] = UP;
 			isWall[3] = false;
 			clickFlag_ = 0;
-			selectWX_[3] = 1000;
-			selectWY_[3] = 440;
+			selectWX_[3] = 1085;
+			selectWY_[3] = 650;
 		}
 	}
 
 	// ステージ3
 	if (stageNo == STAGE3)
 	{
+		//ステージ外
+		for (int i = 0; i < 8; i++) {
+			if (deadFlag_ == 1) {
+				if (efectTimer_ <= 50) {
+					efectTimer_ += 1;
+				}
+				if (efectTimer_ >= 50) {
+					if (efectFlag_[i] == 1) {
+
+						if (Timer_[i] <= 10) {
+							Timer_[i] += 1;
+							efectPosX_[0] += 1;
+							efectPosX_[1] -= 1;
+							efectPosY_[2] += 1;
+							efectPosY_[3] -= 1;
+
+							efectPosX_[4] += 1;
+							efectPosY_[4] += 1;
+							efectPosX_[5] -= 1;
+							efectPosY_[5] -= 1;
+							efectPosX_[6] -= 1;
+							efectPosY_[6] += 1;
+							efectPosX_[7] += 1;
+							efectPosY_[7] -= 1;
+						}
+						if (Timer_[i] >= 10) {
+							efectFlag_[i] = 0;
+							Timer_[i] = 0;
+
+						}
+					}
+					else {
+						efectFlag_[i] = 1;
+						efectTimer_ = 0;
+						for (int y = 0; y < mapCountY; y++) {
+							for (int x = 0; x < mapCountX; x++) {
+								if (map2[y][x] == ENEMY) {
+									efectPosX_[i] = x * Size;
+									efectPosY_[i] = y * Size;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
 		// プレイヤー操作
 		for (int y = 0; y < mapCountY; y++) {
 			for (int x = 0; x < mapCountX; x++) {
@@ -1138,8 +1302,8 @@ void GameManager::Update(int stageNo, char keys[256])
 			map2[leftTY[0]][leftTX[0]] = LEFT;
 			isWall[0] = false;
 			clickFlag_ = 0;
-			selectWX_[0] = 1000;
-			selectWY_[0] = 260;
+			selectWX_[0] = 1085;
+			selectWY_[0] = 165;
 		}
 
 		//右ブロック
@@ -1178,8 +1342,8 @@ void GameManager::Update(int stageNo, char keys[256])
 			map2[leftTY[1]][leftTX[1]] = RIGHT;
 			isWall[1] = false;
 			clickFlag_ = 0;
-			selectWX_[1] = 1000;
-			selectWY_[1] = 320;
+			selectWX_[1] = 1085;
+			selectWY_[1] = 330;
 		}
 
 
@@ -1219,8 +1383,8 @@ void GameManager::Update(int stageNo, char keys[256])
 			map2[leftTY[2]][leftTX[2]] = DOWN;
 			isWall[2] = false;
 			clickFlag_ = 0;
-			selectWX_[2] = 1000;
-			selectWY_[2] = 380;
+			selectWX_[2] = 1085;
+			selectWY_[2] = 485;
 		}
 
 		//上ブロック
@@ -1259,8 +1423,8 @@ void GameManager::Update(int stageNo, char keys[256])
 			map2[leftTY[3]][leftTX[3]] = UP;
 			isWall[3] = false;
 			clickFlag_ = 0;
-			selectWX_[3] = 1000;
-			selectWY_[3] = 440;
+			selectWX_[3] = 1085;
+			selectWY_[3] = 650;
 		}
 	}
 
@@ -1298,7 +1462,7 @@ void GameManager::Update(int stageNo, char keys[256])
 			shotMove_ = 4;
 		}
 	}
-	
+
 	if (Novice::IsPressMouse(1) && isWall[0])
 	{
 		isWall[0] = false;
@@ -1306,8 +1470,8 @@ void GameManager::Update(int stageNo, char keys[256])
 		saveLeftTX[0] = leftTX[0];
 		saveLeftTY[0] = leftTY[0];
 		clickFlag_ = 0;
-		selectWX_[0] = 1000;
-		selectWY_[0] = 260;
+		selectWX_[0] = 1085;
+		selectWY_[0] = 165;
 	}
 
 	if (Novice::IsPressMouse(1) && isWall[1])
@@ -1317,8 +1481,8 @@ void GameManager::Update(int stageNo, char keys[256])
 		saveLeftTX[1] = leftTX[1];
 		saveLeftTY[1] = leftTY[1];
 		clickFlag_ = 0;
-		selectWX_[1] = 1000;
-		selectWY_[1] = 260 + 60;
+		selectWX_[1] = 1085;
+		selectWY_[1] = 330;
 	}
 
 	if (Novice::IsPressMouse(1) && isWall[2])
@@ -1328,8 +1492,8 @@ void GameManager::Update(int stageNo, char keys[256])
 		saveLeftTX[2] = leftTX[2];
 		saveLeftTY[2] = leftTY[2];
 		clickFlag_ = 0;
-		selectWX_[2] = 1000;
-		selectWY_[2] = 260 + 60 * 2;
+		selectWX_[2] = 1085;
+		selectWY_[2] = 485;
 	}
 
 	if (Novice::IsPressMouse(1) && isWall[3])
@@ -1339,9 +1503,22 @@ void GameManager::Update(int stageNo, char keys[256])
 		saveLeftTX[3] = leftTX[3];
 		saveLeftTY[3] = leftTY[3];
 		clickFlag_ = 0;
-		selectWX_[3] = 1000;
-		selectWY_[3] = 260 + 60 * 3;
+		selectWX_[3] = 1085;
+		selectWY_[3] = 650;
 	}
+
+	// リセット
+	if (keys[DIK_R]) {
+		MapReset();
+	}
+
+	// ゲームクリア処理
+	if (keys[DIK_F])
+	{
+		gameClear_->SetFIn(true);
+	}
+
+	// ゲームオーバー処理
 }
 
 
@@ -1356,29 +1533,35 @@ void GameManager::Draw(int stageNo)
 
 				// 背景
 				if (map0[y][x] == BACK) {
-					Novice::DrawSprite(x * Size, y * Size, back, 2, 2, 0, backColor_[y][x]);
+					Novice::DrawSprite(x * Size, y * Size, back, 1, 1, 0, backColor_[y][x]);
 				}
 
 				// 壁
 				if (map0[y][x] == WALL) {
-					Novice::DrawSprite(x * Size, y * Size, wall, 2, 2, 0, WHITE);
+					Novice::DrawSprite(x * Size, y * Size, wall, 1, 1, 0, WHITE);
 				}
 
 				if (map0[y][x] == PLAYER) {
-					Novice::DrawSprite(x * Size, y * Size, wall, 2, 2, 0, RED);
+					Novice::DrawSprite(x * Size, y * Size, player, 2, 2, 0, WHITE);
 				}
+				// 上
 				if (map0[y][x] == UP) {
-					Novice::DrawSprite(x * Size, y * Size, wall, 2, 2, 0, BLUE);
+					Novice::DrawSprite(x * Size, y * Size, up, 2, 2, 0, WHITE);
 				}
-				if (map0[y][x] == RIGHT) {
-					Novice::DrawSprite(x * Size, y * Size, wall, 2, 2, 0, 0xFF00FFFF);
-				}
-				if (map0[y][x] == LEFT) {
-					Novice::DrawSprite(x * Size, y * Size, wall, 2, 2, 0, 0x00FFFFFF);
-				}
+				// 下
 				if (map0[y][x] == DOWN) {
-					Novice::DrawSprite(x * Size, y * Size, wall, 2, 2, 0, 0xCC00FFFF);
+					Novice::DrawSprite(x * Size, y * Size, down, 2, 2, 0, WHITE);
 				}
+				// 右
+				if (map0[y][x] == RIGHT) {
+					Novice::DrawSprite(x * Size, y * Size, right, 2, 2, 0, WHITE);
+				}
+				// 左
+				if (map0[y][x] == LEFT) {
+					Novice::DrawSprite(x * Size, y * Size, left, 2, 2, 0, WHITE);
+				}
+
+				Novice::DrawSprite(960, 0, panel, 1, 1, 0, WHITE);
 			}
 
 			if (stageNumber == STAGE2) {
@@ -1408,7 +1591,7 @@ void GameManager::Draw(int stageNo)
 				if (map1[y][x] == DOWN) {
 					Novice::DrawSprite(x * Size, y * Size, wall, 2, 2, 0, 0xCC00FFFF);
 				}
-				
+
 			}
 
 			if (stageNumber == STAGE3) {
@@ -1442,6 +1625,14 @@ void GameManager::Draw(int stageNo)
 		}
 	}
 
+	for (int i = 0; i < 8; i++) {
+		if (efectFlag_[i] == 1) {
+			if (efectTimer_ >= 50) {
+				Novice::DrawSprite(efectPosX_[i] + 16, efectPosY_[i] + 16, wall, 0.5f, 0.5f, 0, 0xFF00FFFF);
+			}
+		}
+	}
+
 	Novice::ScreenPrintf(1000, 0, "map[%d][%d]", leftTY, leftTX);
 	Novice::ScreenPrintf(1000, 20, "saveMap[%d][%d]", saveLeftTY, saveLeftTX);
 
@@ -1452,12 +1643,31 @@ void GameManager::Draw(int stageNo)
 
 	for (int i = 0; i < 4; i++) {
 		Novice::DrawBox(selectWX_[i], selectWY_[i], selectWR_[i], selectWR_[i], 0.f, selectWColor_[i], kFillModeSolid);
-		Novice::DrawSprite(selectWX_[i], selectWY_[i], wall, 2, 2, 0, selectWColor_[i]);
 	}
-
+	Novice::DrawSprite(selectWX_[0], selectWY_[0], left, 2, 2, 0, selectWColor_[0]);
+	Novice::DrawSprite(selectWX_[1], selectWY_[1], right, 2, 2, 0, selectWColor_[1]);
+	Novice::DrawSprite(selectWX_[2], selectWY_[2], down, 2, 2, 0, selectWColor_[2]);
+	Novice::DrawSprite(selectWX_[3], selectWY_[3], up, 2, 2, 0, selectWColor_[3]);
 	if (shotFlag_ == 1) {
-		Novice::DrawSprite(shotPosX_, shotPosY_, wall, 2.0f, 2.0f, 0.0f, GREEN);
+		Novice::DrawSprite(shotPosX_, shotPosY_, wall, 1.0f, 1.0f, 0.0f, GREEN);
 
 	}
 }
 
+void GameManager::MapReset()
+{
+	// リセット
+	for (int y = 0; y < mapCountY; y++) {
+		for (int x = 0; x < mapCountX; x++) {
+
+			// ステージ１
+			map0[y][x] = initializeMap0[y][x];
+			// ステージ２
+			map1[y][x] = initializeMap1[y][x];
+			// ステージ３
+			map2[y][x] = initializeMap2[y][x];
+
+			backColor_[y][x] = WHITE;
+		}
+	}
+}
