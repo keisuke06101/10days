@@ -42,6 +42,7 @@ void SceneManager::Update(char* keys, char* preKeys)
 
 		stageSelect_->Update();
 		gameManager_->GetGameClear()->Update(gameManager_->GetGameClear()->GetFIn());
+		gameManager_->GetGameOver()->Update(gameManager_->GetGameOver()->GetFIn());
 		if (stageSelect_->IsGameStart() == true)
 		{
 			gameManager_->Initialize();
@@ -54,13 +55,14 @@ void SceneManager::Update(char* keys, char* preKeys)
 		
 		gameManager_->Update(stageSelect_->GetStageNo(), keys);
 		gameManager_->GetGameClear()->Update(gameManager_->GetGameClear()->GetFIn());
+		gameManager_->GetGameOver()->Update(gameManager_->GetGameOver()->GetFIn());
 
+		// ゲームクリア処理
 		if (gameManager_->GetGameClear()->SelectR() && gameManager_->GetGameClear()->IsSceneChange()) {
 			sceneNo_ = StageSelectScene;
 			stageSelect_->Initialize();
 			gameManager_->GetGameClear()->Initialize();
 		}
-
 		if (gameManager_->GetGameClear()->SelectL() && gameManager_->GetGameClear()->GetRad() >= 1400) {
 			gameManager_->MapReset();
 		}
@@ -68,7 +70,22 @@ void SceneManager::Update(char* keys, char* preKeys)
 		{
 			gameManager_->GetGameClear()->Initialize();
 		}
-		
+
+		// ゲームオーバー処理
+		if (gameManager_->GetGameOver()->SelectR() && gameManager_->GetGameOver()->IsSceneChange()) {
+			sceneNo_ = StageSelectScene;
+			stageSelect_->Initialize();
+			gameManager_->GetGameOver()->Initialize();
+		}
+		if (gameManager_->GetGameOver()->SelectL() && gameManager_->GetGameOver()->GetRad() >= 1400) {
+			gameManager_->MapReset();
+		}
+		if (gameManager_->GetGameOver()->IsSceneChange() && gameManager_->GetGameOver()->GetRad() <= 0 && gameManager_->GetGameOver()->SelectL())
+		{
+			gameManager_->GetGameOver()->Initialize();
+		}
+
+
 		break;
 	case GameClearScene:
 
@@ -101,6 +118,8 @@ void SceneManager::Draw()
 
 		gameManager_->GetGameClear()->Draw();
 
+		gameManager_->GetGameOver()->Draw();
+
 		break;
 
 
@@ -109,6 +128,8 @@ void SceneManager::Draw()
 		gameManager_->Draw(stageSelect_->GetStageNo());
 
 		gameManager_->GetGameClear()->Draw();
+		
+		gameManager_->GetGameOver()->Draw();
 
 		break;
 

@@ -3,9 +3,10 @@
 #include <Novice.h>
 #include <Vector2.h>
 #include "Struct.h"
+
 #pragma once
 
-class GameClear
+class GameOver
 {
 private:
 
@@ -17,7 +18,7 @@ private:
 	bool flagOut_ = 0;
 	bool selectR_ = 0;
 	bool selectL_ = 0;
-	bool isGameClear_ = 0;
+	bool isGameOver_ = 0;
 	int distance_ = 320;
 
 	// マウス
@@ -64,7 +65,7 @@ private:
 	int boxColorL_ = WHITE;
 
 	//テクスチャ
-	int gameClear_ = 0;
+	int gameOver_ = 0;
 	int retry_ = 0;
 	int backSelect_ = 0;
 
@@ -150,9 +151,9 @@ public:
 		return flagOut_;
 	}
 
-	bool GetGameClear()
+	bool GetGameOver()
 	{
-		return isGameClear_;
+		return isGameOver_;
 	}
 
 	bool IsSceneChange()
@@ -176,7 +177,7 @@ public:
 	}
 	void SetGameOver(bool isGameOver)
 	{
-		this->isGameClear_ = isGameOver;
+		this->isGameOver_ = isGameOver;
 	}
 
 };

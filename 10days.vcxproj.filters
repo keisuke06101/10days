@@ -50,6 +50,9 @@
     <ClCompile Include="GameClear.cpp">
       <Filter>KamataEngine</Filter>
     </ClCompile>
+    <ClCompile Include="GameOver.cpp">
+      <Filter>KamataEngine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="C:\KamataEngine\DirectXGame\audio\Audio.h">
@@ -129,6 +132,7 @@
     <ClInclude Include="Struct.h">
       <Filter>KamataEngine\Source</Filter>
     </ClInclude>
+    <ClInclude Include="GameOver.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="10days.rc" />

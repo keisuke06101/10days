@@ -1,4 +1,5 @@
 ﻿#include "GameManager.h"
+#include <stdlib.h>
 
 void GameManager::Initialize()
 {
@@ -49,25 +50,43 @@ void GameManager::Initialize()
 		isWall[i] = 0;
 		clickFlag_ = 0;
 	}
-
 	efectTimer_ = 0;
-	for (int i = 0; i < 20; i++) {
+	for (int i = 0; i < 8; i++) {
 		efectPosX_[i] = 0;
 		efectPosY_[i] = 0;
 		efectFlag_[i] = 0;
-		saveFlag_[i] = 0;
+		saveFlag_ = 0;
 		Timer_[i] = 0;
+		efectAcceleration_[i] = 0.4f;
+		efectVelocity_[i] = 0.0f;
+		randSave[i] = 0;
 	}
-
 	// テクスチャ
 	back = Novice::LoadTexture("./Resource/images/floor.png");                      //背景
 	wall = Novice::LoadTexture("./Resource/images/metaru.png");                     //壁
+	player = Novice::LoadTexture("./Resource/images/player.png");
+	enemy = Novice::LoadTexture("./Resource/images/enemy.png");
+
+	vertical = Novice::LoadTexture("./Resource/images/vertical.png");
+	side = Novice::LoadTexture("./Resource/images/side.png");
+	up = Novice::LoadTexture("./Resource/images/up.png");
+	down = Novice::LoadTexture("./Resource/images/down.png");
+	right = Novice::LoadTexture("./Resource/images/right.png");
+	left = Novice::LoadTexture("./Resource/images/left.png");
+	upAllow = Novice::LoadTexture("./Resource/images/AllowUp.png");
+	downAllow = Novice::LoadTexture("./Resource/images/Allowdown.png");
+	rightAllow = Novice::LoadTexture("./Resource/images/AllowRight.png");
+	leftAllow = Novice::LoadTexture("./Resource/images/AllowLeft.png");
+	panel = Novice::LoadTexture("./Resource/images/panel.png");
+	enemyColor = 0xFFFFFFFF;
 
 	gameClear_ = new GameClear;
 	gameClear_->Initialize();
 
-}
+	gameOver_ = new GameOver;
+	gameOver_->Initialize();
 
+}
 void GameManager::Update(int stageNo, char keys[256])
 {
 
@@ -96,34 +115,35 @@ void GameManager::Update(int stageNo, char keys[256])
 		rightBX[i] = (selectWX_[i] + selectWR_[i] - 1) / Size;
 		rightBY[i] = (selectWY_[i] + selectWR_[i] - 1) / Size;
 	}
-	//左ブロック
-	if (mousePosX_ >= selectWX_[0] && mousePosX_ <= selectWX_[0] + selectWR_[0] &&
-		mousePosY_ >= selectWY_[0] && mousePosY_ <= selectWY_[0] + selectWR_[0] && !isWall[0])
-	{
-		selectWColor_[0] = RED;
-	}
-	else
-	{
-		selectWColor_[0] = WHITE;
-	}
-	if (clickFlag_ == 0) {
-		if (selectWColor_[0] == RED && Novice::IsPressMouse(0))
-		{
-			isWall[0] = true;
-			clickFlag_ = 1;
-		}
-	}
-	if (isWall[0])
-	{
-		selectWX_[0] = mousePosX_;
-		selectWY_[0] = mousePosY_;
-	}
 
-
+	if (shotPosX_ >= 860 || shotPosX_ <= 0) {
+		shotFlag_ = 0;
+	}
 	if (map0[leftTopY_][leftTopX_] == ENEMY || map0[rightTopY_][rightTopX_] == ENEMY) {
 		judgeFlag_ = 1;
 		deadFlag_ = 1;
 		shotFlag_ = 0;
+		shakeFlag_ = 1;
+	}
+	else {
+		judgeFlag_ = 0;
+	}
+
+	if (map1[leftTopY_][leftTopX_] == ENEMY || map1[rightTopY_][rightTopX_] == ENEMY) {
+		judgeFlag_ = 1;
+		deadFlag_ = 1;
+		shotFlag_ = 0;
+		shakeFlag_ = 1;
+	}
+	else {
+		judgeFlag_ = 0;
+	}
+
+	if (map2[leftTopY_][leftTopX_] == ENEMY || map2[rightTopY_][rightTopX_] == ENEMY) {
+		judgeFlag_ = 1;
+		deadFlag_ = 1;
+		shotFlag_ = 0;
+		shakeFlag_ = 1;
 	}
 	else {
 		judgeFlag_ = 0;
@@ -132,32 +152,46 @@ void GameManager::Update(int stageNo, char keys[256])
 	// ステージ1
 	if (stageNo == STAGE1)
 	{
-		//ステージ外
-		for (int i = 0; i < 8; i++) {
-			if (deadFlag_ == 1) {
-				if (efectTimer_ <= 50) {
-					efectTimer_ += 1;
+		if (shakeFlag_ == 1) {
+			shakeRandX_ = update_;
+			shakeRandX_ = rand() % shakeRandX_ - 12;
+			shakeRandY_ = update_;
+			shakeRandY_ = rand() % shakeRandY_ - 12;
+			if (saveFlag_ == 25) {
+				a += 1;
+				if (a == 5) {
+					update_ -= 1;
+					a = 0;
 				}
+			}
+			if (update_ <= 0) {
+				shakeFlag_ = 2;
+				update_ = 24;
+			}
+		}
+		if (shakeFlag_ == 2) {
+			enemyColor -= 3;
+			for (int i = 0; i < 8; i++) {
 				if (efectTimer_ >= 50) {
 					if (efectFlag_[i] == 1) {
 
-						if (Timer_[i] <= 10) {
+						if (Timer_[i] <= 3000) {
 							Timer_[i] += 1;
-							efectPosX_[0] += 1;
-							efectPosX_[1] -= 1;
-							efectPosY_[2] += 1;
-							efectPosY_[3] -= 1;
+							efectPosX_[0] += 0.5f;
+							efectPosX_[1] -= 0.5f;
+							efectPosY_[2] += 0.5f;
+							efectPosY_[3] -= 0.5f;
 
-							efectPosX_[4] += 1;
-							efectPosY_[4] += 1;
-							efectPosX_[5] -= 1;
-							efectPosY_[5] -= 1;
-							efectPosX_[6] -= 1;
-							efectPosY_[6] += 1;
-							efectPosX_[7] += 1;
-							efectPosY_[7] -= 1;
+							efectPosX_[4] += 0.5f;
+							efectPosY_[4] += 0.5f;
+							efectPosX_[5] -= 0.5f;
+							efectPosY_[5] -= 0.5f;
+							efectPosX_[6] -= 0.5f;
+							efectPosY_[6] += 0.5f;
+							efectPosX_[7] += 0.5f;
+							efectPosY_[7] -= 0.5f;
 						}
-						if (Timer_[i] >= 10) {
+						if (Timer_[i] >= 3000) {
 							efectFlag_[i] = 0;
 							Timer_[i] = 0;
 
@@ -165,12 +199,85 @@ void GameManager::Update(int stageNo, char keys[256])
 					}
 					else {
 						efectFlag_[i] = 1;
-						efectTimer_ = 0;
+						//efectTimer_ = 0;
 						for (int y = 0; y < mapCountY; y++) {
 							for (int x = 0; x < mapCountX; x++) {
 								if (map0[y][x] == ENEMY) {
-									efectPosX_[i] = x * Size;
-									efectPosY_[i] = y * Size;
+									efectPosX_[i] = (float(x * Size));
+									efectPosY_[i] = (float(y * Size));
+								}
+							}
+						}
+					}
+				}
+			}
+			if (enemyColor <= -255) {
+				enemyColor = -255;
+				shakeFlag_ = 3;
+			}
+		}
+
+		if (shakeFlag_ == 3) {
+			deadFlag_ = 2;
+		}
+
+		//エフェクト
+		for (int i = 0; i < 8; i++) {
+			randSave[0] = rand() % 4 + 1;
+			randSave[1] = rand() % 4 + 1;
+			randSave[2] = rand() % 4 + 1;
+			randSave[3] = rand() % 4 + 1;
+			randSave[4] = rand() % 7 + 5;
+			randSave[5] = rand() % 7 + 5;
+			randSave[6] = rand() % 7 + 5;
+			randSave[7] = rand() % 7 + 5;
+			if (deadFlag_ == 1) {
+				if (efectTimer_ <= 50) {
+					efectTimer_ += 1;
+
+					if (efectTimer_ >= 51) {
+						efectTimer_ -= 1;
+					}
+				}
+				if (efectTimer_ == 50) {
+
+					if (saveFlag_ <= 24) {
+						if (efectFlag_[i] == 1) {
+
+
+							if (Timer_[i] <= 15) {
+								Timer_[i] += 1;
+								efectPosX_[0] += 0.5f;
+								efectPosX_[1] -= 0.5f;
+								efectPosX_[2] += 1.0f;
+								efectPosX_[3] -= 1.0f;
+								efectPosX_[4] += 0.1f;
+								efectPosX_[5] -= 0.1f;
+								efectPosX_[6] += 1.5f;
+								efectPosX_[7] -= 1.5f;
+
+								efectPosY_[i] -= efectVelocity_[i];
+								efectVelocity_[i] -= efectAcceleration_[i];
+							}
+							if (Timer_[i] >= 15) {
+								efectFlag_[i] = 0;
+								Timer_[i] = 0;
+
+							}
+
+
+						}
+						else {
+							efectFlag_[i] = 1;
+							saveFlag_ += 1;
+							efectVelocity_[i] = (float(randSave[i]));
+							efectTimer_ = 0;
+							for (int y = 0; y < mapCountY; y++) {
+								for (int x = 0; x < mapCountX; x++) {
+									if (map0[y][x] == ENEMY) {
+										efectPosX_[i] = (float(x * Size));
+										efectPosY_[i] = (float(y * Size));
+									}
 								}
 							}
 						}
@@ -178,6 +285,7 @@ void GameManager::Update(int stageNo, char keys[256])
 				}
 			}
 		}
+
 
 		// プレイヤー操作
 		for (int y = 0; y < mapCountY; y++) {
@@ -187,6 +295,19 @@ void GameManager::Update(int stageNo, char keys[256])
 
 						shotPosX_ = x * Size;
 						shotPosY_ = y * Size;
+						savePlayerPosX_ = shotPosX_;
+						savePlayerPosY_ = shotPosY_;
+					}
+				}
+
+				if (judgeFlag_ == 1) {
+					if (map0[y][x] == ENEMY) {
+						for (int i = 0; i < 8; i++) {
+							efectFlag_[i] = 1;
+							efectPosX_[i] = (float(x * Size));
+							efectPosY_[i] = (float(y * Size));
+
+						}
 					}
 				}
 				//壁の判定
@@ -232,9 +353,7 @@ void GameManager::Update(int stageNo, char keys[256])
 							if (map0[leftTopY_][leftTopX_] == BACK || map0[leftTopY_][leftTopX_] == PLAYER) {
 								setShotFlag_ = 1;
 							}
-							if (map0[leftBottomY_][leftBottomX_] == RIGHT) {
-								setShotFlag_ = 1;
-							}
+
 						}
 						if (map0[leftTopY_][leftTopX_] == UP || map0[leftTopY_][leftTopX_] == DOWN ||
 							map0[leftTopY_][leftTopX_] == LEFT) {
@@ -301,7 +420,7 @@ void GameManager::Update(int stageNo, char keys[256])
 
 					if (collisionFlag_ == 1) {
 						if (map0[leftBottomY_][leftBottomX_] == WALL) {
-							if (map0[leftTopY_][leftTopX_] == BACK || map0[leftTopY_][leftTopX_] == PLAYER || map0[rightTopY_][rightTopX_] == PLAYER) {
+							if (map0[leftTopY_][leftTopX_] == BACK || map0[leftTopY_][leftTopX_] == PLAYER) {
 								setShotFlag_ = 1;
 							}
 							if (map0[leftTopY_][leftTopX_] == DOWN) {
@@ -421,176 +540,223 @@ void GameManager::Update(int stageNo, char keys[256])
 
 			}
 		}
+		if (shotFlag_ == 0) {
+			//左ブロック
 
-		// マップとブロックの配置判定
-		if (map0[leftTY[0]][leftTX[0]] == BACK && isWall[0] && selectWX_[0] <= 960)
-		{
-			backColor_[saveLeftTY[0]][saveLeftTX[0]] = WHITE;
-			backColor_[leftTY[0]][leftTX[0]] = RED;
-			saveLeftTX[0] = leftTX[0];
-			saveLeftTY[0] = leftTY[0];
-		}
-
-		if (Novice::IsPressMouse(1) && backColor_[leftTY[0]][leftTX[0]] == RED)
-		{
-			map0[leftTY[0]][leftTX[0]] = LEFT;
-			isWall[0] = false;
-			clickFlag_ = 0;
-			selectWX_[0] = 1085;
-			selectWY_[0] = 165;
-		}
-
-		//右ブロック
-		if (mousePosX_ >= selectWX_[1] && mousePosX_ <= selectWX_[1] + selectWR_[1] &&
-			mousePosY_ >= selectWY_[1] && mousePosY_ <= selectWY_[1] + selectWR_[1] && !isWall[1])
-		{
-			selectWColor_[1] = RED;
-		}
-		else
-		{
-			selectWColor_[1] = WHITE;
-		}
-		if (clickFlag_ == 0) {
-			if (selectWColor_[1] == RED && Novice::IsPressMouse(0))
+			if (mousePosX_ >= selectWX_[0] && mousePosX_ <= selectWX_[0] + selectWR_[0] &&
+				mousePosY_ >= selectWY_[0] && mousePosY_ <= selectWY_[0] + selectWR_[0] && !isWall[0])
 			{
-				isWall[1] = true;
-				clickFlag_ = 1;
+				selectWColor_[0] = RED;
 			}
-		}
-		if (isWall[1])
-		{
-			selectWX_[1] = mousePosX_;
-			selectWY_[1] = mousePosY_;
-		}
-		// マップとブロックの配置判定
-		if (map0[leftTY[1]][leftTX[1]] == BACK && isWall[1] && selectWX_[1] <= 960)
-		{
-			backColor_[saveLeftTY[1]][saveLeftTX[1]] = WHITE;
-			backColor_[leftTY[1]][leftTX[1]] = RED;
-			saveLeftTX[1] = leftTX[1];
-			saveLeftTY[1] = leftTY[1];
-		}
-
-		if (Novice::IsPressMouse(1) && backColor_[leftTY[1]][leftTX[1]] == RED)
-		{
-			map0[leftTY[1]][leftTX[1]] = RIGHT;
-			isWall[1] = false;
-			clickFlag_ = 0;
-			selectWX_[1] = 1085;
-			selectWY_[1] = 330;
-		}
-
-
-		//下ブロック
-		if (mousePosX_ >= selectWX_[2] && mousePosX_ <= selectWX_[2] + selectWR_[2] &&
-			mousePosY_ >= selectWY_[2] && mousePosY_ <= selectWY_[2] + selectWR_[2] && !isWall[2])
-		{
-			selectWColor_[2] = RED;
-		}
-		else
-		{
-			selectWColor_[2] = WHITE;
-		}
-		if (clickFlag_ == 0) {
-			if (selectWColor_[2] == RED && Novice::IsPressMouse(0))
+			else
 			{
-				isWall[2] = true;
-				clickFlag_ = 1;
+				selectWColor_[0] = WHITE;
 			}
-		}
-		if (isWall[2])
-		{
-			selectWX_[2] = mousePosX_;
-			selectWY_[2] = mousePosY_;
-		}
-		// マップとブロックの配置判定
-		if (map0[leftTY[2]][leftTX[2]] == BACK && isWall[2] && selectWX_[2] <= 960)
-		{
-			backColor_[saveLeftTY[2]][saveLeftTX[2]] = WHITE;
-			backColor_[leftTY[2]][leftTX[2]] = RED;
-			saveLeftTX[2] = leftTX[2];
-			saveLeftTY[2] = leftTY[2];
-		}
+			if (clickFlag_ == 0) {
+				if (selectWColor_[0] == RED && Novice::IsPressMouse(0))
+				{
+					isWall[0] = true;
+					clickFlag_ = 1;
+				}
+			}
+			if (clickFlag_ == 1) {
+				if (isWall[0])
+				{
+					selectWX_[0] = mousePosX_;
+					selectWY_[0] = mousePosY_;
+				}
 
-		if (Novice::IsPressMouse(1) && backColor_[leftTY[2]][leftTX[2]] == RED)
-		{
-			map0[leftTY[2]][leftTX[2]] = DOWN;
-			isWall[2] = false;
-			clickFlag_ = 0;
-			selectWX_[2] = 1085;
-			selectWY_[2] = 485;
-		}
+				// マップとブロックの配置判定
+				if (map0[leftTY[0]][leftTX[0]] == BACK && isWall[0] && selectWX_[0] <= 960)
+				{
+					backColor_[saveLeftTY[0]][saveLeftTX[0]] = WHITE;
+					backColor_[leftTY[0]][leftTX[0]] = RED;
+					saveLeftTX[0] = leftTX[0];
+					saveLeftTY[0] = leftTY[0];
+				}
 
-		//上ブロック
-		if (mousePosX_ >= selectWX_[3] && mousePosX_ <= selectWX_[3] + selectWR_[3] &&
-			mousePosY_ >= selectWY_[3] && mousePosY_ <= selectWY_[3] + selectWR_[3] && !isWall[3])
-		{
-			selectWColor_[3] = RED;
-		}
-		else
-		{
-			selectWColor_[3] = WHITE;
-		}
-		if (clickFlag_ == 0) {
-			if (selectWColor_[3] == RED && Novice::IsPressMouse(0))
+				if (Novice::IsPressMouse(1) && backColor_[leftTY[0]][leftTX[0]] == RED && map0[leftTY[0]][leftTX[0]] == BACK)
+				{
+					map0[leftTY[0]][leftTX[0]] = LEFT;
+					isWall[0] = false;
+					clickFlag_ = 0;
+					selectWX_[0] = 1085;
+					selectWY_[0] = 165;
+				}
+			}
+			//右ブロック
+			if (mousePosX_ >= selectWX_[1] && mousePosX_ <= selectWX_[1] + selectWR_[1] &&
+				mousePosY_ >= selectWY_[1] && mousePosY_ <= selectWY_[1] + selectWR_[1] && !isWall[1])
 			{
-				isWall[3] = true;
-				clickFlag_ = 1;
+				selectWColor_[1] = RED;
 			}
-		}
-		if (isWall[3])
-		{
-			selectWX_[3] = mousePosX_;
-			selectWY_[3] = mousePosY_;
-		}
-		// マップとブロックの配置判定
-		if (map0[leftTY[3]][leftTX[3]] == BACK && isWall[3] && selectWX_[3] <= 960)
-		{
-			backColor_[saveLeftTY[3]][saveLeftTX[3]] = WHITE;
-			backColor_[leftTY[3]][leftTX[3]] = RED;
-			saveLeftTX[3] = leftTX[3];
-			saveLeftTY[3] = leftTY[3];
-		}
+			else
+			{
+				selectWColor_[1] = WHITE;
+			}
+			if (clickFlag_ == 0) {
+				if (selectWColor_[1] == RED && Novice::IsPressMouse(0))
+				{
+					isWall[1] = true;
+					clickFlag_ = 2;
+				}
+			}
+			if (clickFlag_ == 2) {
+				if (isWall[1])
+				{
+					selectWX_[1] = mousePosX_;
+					selectWY_[1] = mousePosY_;
+				}
+				// マップとブロックの配置判定
+				if (map0[leftTY[1]][leftTX[1]] == BACK && isWall[1] && selectWX_[1] <= 960)
+				{
+					backColor_[saveLeftTY[1]][saveLeftTX[1]] = WHITE;
+					backColor_[leftTY[1]][leftTX[1]] = RED;
+					saveLeftTX[1] = leftTX[1];
+					saveLeftTY[1] = leftTY[1];
+				}
 
-		if (Novice::IsPressMouse(1) && backColor_[leftTY[3]][leftTX[3]] == RED)
-		{
-			map0[leftTY[3]][leftTX[3]] = UP;
-			isWall[3] = false;
-			clickFlag_ = 0;
-			selectWX_[3] = 1085;
-			selectWY_[3] = 650;
+				if (Novice::IsPressMouse(1) && backColor_[leftTY[1]][leftTX[1]] == RED && map0[leftTY[1]][leftTX[1]] == BACK)
+				{
+					map0[leftTY[1]][leftTX[1]] = RIGHT;
+					isWall[1] = false;
+					clickFlag_ = 0;
+					selectWX_[1] = 1085;
+					selectWY_[1] = 330;
+				}
+			}
+
+			//下ブロック
+			if (mousePosX_ >= selectWX_[2] && mousePosX_ <= selectWX_[2] + selectWR_[2] &&
+				mousePosY_ >= selectWY_[2] && mousePosY_ <= selectWY_[2] + selectWR_[2] && !isWall[2])
+			{
+				selectWColor_[2] = RED;
+			}
+			else
+			{
+				selectWColor_[2] = WHITE;
+			}
+			if (clickFlag_ == 0) {
+				if (selectWColor_[2] == RED && Novice::IsPressMouse(0))
+				{
+					isWall[2] = true;
+					clickFlag_ = 3;
+				}
+			}
+			if (clickFlag_ == 3) {
+				if (isWall[2])
+				{
+					selectWX_[2] = mousePosX_;
+					selectWY_[2] = mousePosY_;
+				}
+				// マップとブロックの配置判定
+				if (map0[leftTY[2]][leftTX[2]] == BACK && isWall[2] && selectWX_[2] <= 960)
+				{
+					backColor_[saveLeftTY[2]][saveLeftTX[2]] = WHITE;
+					backColor_[leftTY[2]][leftTX[2]] = RED;
+					saveLeftTX[2] = leftTX[2];
+					saveLeftTY[2] = leftTY[2];
+				}
+
+				if (Novice::IsPressMouse(1) && backColor_[leftTY[2]][leftTX[2]] == RED && map0[leftTY[2]][leftTX[2]] == BACK)
+				{
+					map0[leftTY[2]][leftTX[2]] = DOWN;
+					isWall[2] = false;
+					clickFlag_ = 0;
+					selectWX_[2] = 1085;
+					selectWY_[2] = 485;
+				}
+			}
+
+			//上ブロック
+			if (mousePosX_ >= selectWX_[3] && mousePosX_ <= selectWX_[3] + selectWR_[3] &&
+				mousePosY_ >= selectWY_[3] && mousePosY_ <= selectWY_[3] + selectWR_[3] && !isWall[3])
+			{
+				selectWColor_[3] = RED;
+			}
+			else
+			{
+				selectWColor_[3] = WHITE;
+			}
+			if (clickFlag_ == 0) {
+				if (selectWColor_[3] == RED && Novice::IsPressMouse(0))
+				{
+					isWall[3] = true;
+					clickFlag_ = 4;
+				}
+			}
+
+			if (clickFlag_ == 4) {
+				if (isWall[3])
+				{
+					selectWX_[3] = mousePosX_;
+					selectWY_[3] = mousePosY_;
+				}
+				// マップとブロックの配置判定
+				if (map0[leftTY[3]][leftTX[3]] == BACK && isWall[3] && selectWX_[3] <= 960)
+				{
+					backColor_[saveLeftTY[3]][saveLeftTX[3]] = WHITE;
+					backColor_[leftTY[3]][leftTX[3]] = RED;
+					saveLeftTX[3] = leftTX[3];
+					saveLeftTY[3] = leftTY[3];
+				}
+
+				if (Novice::IsPressMouse(1) && backColor_[leftTY[3]][leftTX[3]] == RED && map0[leftTY[3]][leftTX[3]] == BACK)
+				{
+					map0[leftTY[3]][leftTX[3]] = UP;
+					isWall[3] = false;
+					clickFlag_ = 0;
+					selectWX_[3] = 1085;
+					selectWY_[3] = 650;
+				}
+			}
 		}
 	}
 
 	// ステージ2
 	if (stageNo == STAGE2)
 	{
-		//ステージ外
-		for (int i = 0; i < 8; i++) {
-			if (deadFlag_ == 1) {
-				if (efectTimer_ <= 50) {
-					efectTimer_ += 1;
+		//シェイク
+		if (shakeFlag_ == 1) {
+			shakeRandX_ = update_;
+			shakeRandX_ = rand() % shakeRandX_ - 12;
+			shakeRandY_ = update_;
+			shakeRandY_ = rand() % shakeRandY_ - 12;
+			if (saveFlag_ == 25) {
+				a += 1;
+				if (a == 5) {
+					update_ -= 1;
+					a = 0;
 				}
+			}
+			if (update_ <= 0) {
+				shakeFlag_ = 2;
+				update_ = 24;
+			}
+		}
+		if (shakeFlag_ == 2) {
+			enemyColor -= 3;
+			for (int i = 0; i < 8; i++) {
 				if (efectTimer_ >= 50) {
 					if (efectFlag_[i] == 1) {
 
-						if (Timer_[i] <= 10) {
+						if (Timer_[i] <= 3000) {
 							Timer_[i] += 1;
-							efectPosX_[0] += 1;
-							efectPosX_[1] -= 1;
-							efectPosY_[2] += 1;
-							efectPosY_[3] -= 1;
+							efectPosX_[0] += 0.5f;
+							efectPosX_[1] -= 0.5f;
+							efectPosY_[2] += 0.5f;
+							efectPosY_[3] -= 0.5f;
 
-							efectPosX_[4] += 1;
-							efectPosY_[4] += 1;
-							efectPosX_[5] -= 1;
-							efectPosY_[5] -= 1;
-							efectPosX_[6] -= 1;
-							efectPosY_[6] += 1;
-							efectPosX_[7] += 1;
-							efectPosY_[7] -= 1;
+							efectPosX_[4] += 0.5f;
+							efectPosY_[4] += 0.5f;
+							efectPosX_[5] -= 0.5f;
+							efectPosY_[5] -= 0.5f;
+							efectPosX_[6] -= 0.5f;
+							efectPosY_[6] += 0.5f;
+							efectPosX_[7] += 0.5f;
+							efectPosY_[7] -= 0.5f;
 						}
-						if (Timer_[i] >= 10) {
+						if (Timer_[i] >= 3000) {
 							efectFlag_[i] = 0;
 							Timer_[i] = 0;
 
@@ -598,12 +764,85 @@ void GameManager::Update(int stageNo, char keys[256])
 					}
 					else {
 						efectFlag_[i] = 1;
-						efectTimer_ = 0;
+						//efectTimer_ = 0;
 						for (int y = 0; y < mapCountY; y++) {
 							for (int x = 0; x < mapCountX; x++) {
 								if (map1[y][x] == ENEMY) {
-									efectPosX_[i] = x * Size;
-									efectPosY_[i] = y * Size;
+									efectPosX_[i] = (float(x * Size));
+									efectPosY_[i] = (float(y * Size));
+								}
+							}
+						}
+					}
+				}
+			}
+			if (enemyColor <= -255) {
+				enemyColor = -255;
+				shakeFlag_ = 3;
+			}
+		}
+
+		if (shakeFlag_ == 3) {
+			deadFlag_ = 2;
+		}
+
+		//エフェクト
+		for (int i = 0; i < 8; i++) {
+			randSave[0] = rand() % 4 + 1;
+			randSave[1] = rand() % 4 + 1;
+			randSave[2] = rand() % 4 + 1;
+			randSave[3] = rand() % 4 + 1;
+			randSave[4] = rand() % 7 + 5;
+			randSave[5] = rand() % 7 + 5;
+			randSave[6] = rand() % 7 + 5;
+			randSave[7] = rand() % 7 + 5;
+			if (deadFlag_ == 1) {
+				if (efectTimer_ <= 50) {
+					efectTimer_ += 1;
+
+					if (efectTimer_ >= 51) {
+						efectTimer_ -= 1;
+					}
+				}
+				if (efectTimer_ == 50) {
+
+					if (saveFlag_ <= 24) {
+						if (efectFlag_[i] == 1) {
+
+
+							if (Timer_[i] <= 15) {
+								Timer_[i] += 1;
+								efectPosX_[0] += 0.5f;
+								efectPosX_[1] -= 0.5f;
+								efectPosX_[2] += 1.0f;
+								efectPosX_[3] -= 1.0f;
+								efectPosX_[4] += 0.1f;
+								efectPosX_[5] -= 0.1f;
+								efectPosX_[6] += 1.5f;
+								efectPosX_[7] -= 1.5f;
+
+								efectPosY_[i] -= efectVelocity_[i];
+								efectVelocity_[i] -= efectAcceleration_[i];
+							}
+							if (Timer_[i] >= 15) {
+								efectFlag_[i] = 0;
+								Timer_[i] = 0;
+
+							}
+
+
+						}
+						else {
+							efectFlag_[i] = 1;
+							saveFlag_ += 1;
+							efectVelocity_[i] = (float(randSave[i]));
+							efectTimer_ = 0;
+							for (int y = 0; y < mapCountY; y++) {
+								for (int x = 0; x < mapCountX; x++) {
+									if (map1[y][x] == ENEMY) {
+										efectPosX_[i] = (float(x * Size));
+										efectPosY_[i] = (float(y * Size));
+									}
 								}
 							}
 						}
@@ -611,7 +850,6 @@ void GameManager::Update(int stageNo, char keys[256])
 				}
 			}
 		}
-
 		// プレイヤー操作
 		for (int y = 0; y < mapCountY; y++) {
 			for (int x = 0; x < mapCountX; x++) {
@@ -620,6 +858,8 @@ void GameManager::Update(int stageNo, char keys[256])
 
 						shotPosX_ = x * Size;
 						shotPosY_ = y * Size;
+						savePlayerPosX_ = shotPosX_;
+						savePlayerPosY_ = shotPosY_;
 					}
 				}
 				//壁の判定
@@ -665,9 +905,7 @@ void GameManager::Update(int stageNo, char keys[256])
 							if (map1[leftTopY_][leftTopX_] == BACK || map1[leftTopY_][leftTopX_] == PLAYER) {
 								setShotFlag_ = 1;
 							}
-							if (map1[leftBottomY_][leftBottomX_] == RIGHT) {
-								setShotFlag_ = 1;
-							}
+
 						}
 						if (map1[leftTopY_][leftTopX_] == UP || map1[leftTopY_][leftTopX_] == DOWN ||
 							map1[leftTopY_][leftTopX_] == LEFT) {
@@ -854,176 +1092,219 @@ void GameManager::Update(int stageNo, char keys[256])
 
 			}
 		}
-
-		// マップとブロックの配置判定
-		if (map1[leftTY[0]][leftTX[0]] == BACK && isWall[0] && selectWX_[0] <= 960)
-		{
-			backColor_[saveLeftTY[0]][saveLeftTX[0]] = WHITE;
-			backColor_[leftTY[0]][leftTX[0]] = RED;
-			saveLeftTX[0] = leftTX[0];
-			saveLeftTY[0] = leftTY[0];
-		}
-
-		if (Novice::IsPressMouse(1) && backColor_[leftTY[0]][leftTX[0]] == RED)
-		{
-			map1[leftTY[0]][leftTX[0]] = LEFT;
-			isWall[0] = false;
-			clickFlag_ = 0;
-			selectWX_[0] = 1085;
-			selectWY_[0] = 165;
-		}
-
-		//右ブロック
-		if (mousePosX_ >= selectWX_[1] && mousePosX_ <= selectWX_[1] + selectWR_[1] &&
-			mousePosY_ >= selectWY_[1] && mousePosY_ <= selectWY_[1] + selectWR_[1] && !isWall[1])
-		{
-			selectWColor_[1] = RED;
-		}
-		else
-		{
-			selectWColor_[1] = 0xFF00FFFF;
-		}
-		if (clickFlag_ == 0) {
-			if (selectWColor_[1] == RED && Novice::IsPressMouse(0))
+		if (shotFlag_ == 0) {
+			//左ブロック
+			if (mousePosX_ >= selectWX_[0] && mousePosX_ <= selectWX_[0] + selectWR_[0] &&
+				mousePosY_ >= selectWY_[0] && mousePosY_ <= selectWY_[0] + selectWR_[0] && !isWall[0])
 			{
-				isWall[1] = true;
-				clickFlag_ = 1;
+				selectWColor_[0] = RED;
 			}
-		}
-		if (isWall[1])
-		{
-			selectWX_[1] = mousePosX_;
-			selectWY_[1] = mousePosY_;
-		}
-		// マップとブロックの配置判定
-		if (map0[leftTY[1]][leftTX[1]] == BACK && isWall[1] && selectWX_[1] <= 960)
-		{
-			backColor_[saveLeftTY[1]][saveLeftTX[1]] = WHITE;
-			backColor_[leftTY[1]][leftTX[1]] = RED;
-			saveLeftTX[1] = leftTX[1];
-			saveLeftTY[1] = leftTY[1];
-		}
-
-		if (Novice::IsPressMouse(1) && backColor_[leftTY[1]][leftTX[1]] == RED)
-		{
-			map0[leftTY[1]][leftTX[1]] = RIGHT;
-			isWall[1] = false;
-			clickFlag_ = 0;
-			selectWX_[1] = 1085;
-			selectWY_[1] = 330;
-		}
-
-
-		//下ブロック
-		if (mousePosX_ >= selectWX_[2] && mousePosX_ <= selectWX_[2] + selectWR_[2] &&
-			mousePosY_ >= selectWY_[2] && mousePosY_ <= selectWY_[2] + selectWR_[2] && !isWall[2])
-		{
-			selectWColor_[2] = RED;
-		}
-		else
-		{
-			selectWColor_[2] = 0xCC00FFFF;
-		}
-		if (clickFlag_ == 0) {
-			if (selectWColor_[2] == RED && Novice::IsPressMouse(0))
+			else
 			{
-				isWall[2] = true;
-				clickFlag_ = 1;
+				selectWColor_[0] = WHITE;
 			}
-		}
-		if (isWall[2])
-		{
-			selectWX_[2] = mousePosX_;
-			selectWY_[2] = mousePosY_;
-		}
-		// マップとブロックの配置判定
-		if (map1[leftTY[2]][leftTX[2]] == BACK && isWall[2] && selectWX_[2] <= 960)
-		{
-			backColor_[saveLeftTY[2]][saveLeftTX[2]] = WHITE;
-			backColor_[leftTY[2]][leftTX[2]] = RED;
-			saveLeftTX[2] = leftTX[2];
-			saveLeftTY[2] = leftTY[2];
-		}
+			if (clickFlag_ == 0) {
+				if (selectWColor_[0] == RED && Novice::IsPressMouse(0))
+				{
+					isWall[0] = true;
+					clickFlag_ = 1;
+				}
+			}
+			if (clickFlag_ == 1) {
+				if (isWall[0])
+				{
+					selectWX_[0] = mousePosX_;
+					selectWY_[0] = mousePosY_;
+				}
 
-		if (Novice::IsPressMouse(1) && backColor_[leftTY[2]][leftTX[2]] == RED)
-		{
-			map1[leftTY[2]][leftTX[2]] = DOWN;
-			isWall[2] = false;
-			clickFlag_ = 0;
-			selectWX_[2] = 1085;
-			selectWY_[2] = 485;
-		}
+				// マップとブロックの配置判定
+				if (map1[leftTY[0]][leftTX[0]] == BACK && isWall[0] && selectWX_[0] <= 960)
+				{
+					backColor_[saveLeftTY[0]][saveLeftTX[0]] = WHITE;
+					backColor_[leftTY[0]][leftTX[0]] = RED;
+					saveLeftTX[0] = leftTX[0];
+					saveLeftTY[0] = leftTY[0];
+				}
 
-		//上ブロック
-		if (mousePosX_ >= selectWX_[3] && mousePosX_ <= selectWX_[3] + selectWR_[3] &&
-			mousePosY_ >= selectWY_[3] && mousePosY_ <= selectWY_[3] + selectWR_[3] && !isWall[3])
-		{
-			selectWColor_[3] = RED;
-		}
-		else
-		{
-			selectWColor_[3] = BLUE;
-		}
-		if (clickFlag_ == 0) {
-			if (selectWColor_[3] == RED && Novice::IsPressMouse(0))
+				if (Novice::IsPressMouse(1) && backColor_[leftTY[0]][leftTX[0]] == RED && map1[leftTY[0]][leftTX[0]] == BACK)
+				{
+					map1[leftTY[0]][leftTX[0]] = LEFT;
+					isWall[0] = false;
+					clickFlag_ = 0;
+					selectWX_[0] = 1085;
+					selectWY_[0] = 165;
+				}
+			}
+			//右ブロック
+			if (mousePosX_ >= selectWX_[1] && mousePosX_ <= selectWX_[1] + selectWR_[1] &&
+				mousePosY_ >= selectWY_[1] && mousePosY_ <= selectWY_[1] + selectWR_[1] && !isWall[1])
 			{
-				isWall[3] = true;
-				clickFlag_ = 1;
+				selectWColor_[1] = RED;
 			}
-		}
-		if (isWall[3])
-		{
-			selectWX_[3] = mousePosX_;
-			selectWY_[3] = mousePosY_;
-		}
-		// マップとブロックの配置判定
-		if (map1[leftTY[3]][leftTX[3]] == BACK && isWall[3] && selectWX_[3] <= 960)
-		{
-			backColor_[saveLeftTY[3]][saveLeftTX[3]] = WHITE;
-			backColor_[leftTY[3]][leftTX[3]] = RED;
-			saveLeftTX[3] = leftTX[3];
-			saveLeftTY[3] = leftTY[3];
-		}
+			else
+			{
+				selectWColor_[1] = WHITE;
+			}
+			if (clickFlag_ == 0) {
+				if (selectWColor_[1] == RED && Novice::IsPressMouse(0))
+				{
+					isWall[1] = true;
+					clickFlag_ = 2;
+				}
+			}
+			if (clickFlag_ == 2) {
+				if (isWall[1])
+				{
+					selectWX_[1] = mousePosX_;
+					selectWY_[1] = mousePosY_;
+				}
+				// マップとブロックの配置判定
+				if (map1[leftTY[1]][leftTX[1]] == BACK && isWall[1] && selectWX_[1] <= 960)
+				{
+					backColor_[saveLeftTY[1]][saveLeftTX[1]] = WHITE;
+					backColor_[leftTY[1]][leftTX[1]] = RED;
+					saveLeftTX[1] = leftTX[1];
+					saveLeftTY[1] = leftTY[1];
+				}
 
-		if (Novice::IsPressMouse(1) && backColor_[leftTY[3]][leftTX[3]] == RED)
-		{
-			map1[leftTY[3]][leftTX[3]] = UP;
-			isWall[3] = false;
-			clickFlag_ = 0;
-			selectWX_[3] = 1085;
-			selectWY_[3] = 650;
+				if (Novice::IsPressMouse(1) && backColor_[leftTY[1]][leftTX[1]] == RED && map1[leftTY[1]][leftTX[1]] == BACK)
+				{
+					map1[leftTY[1]][leftTX[1]] = RIGHT;
+					isWall[1] = false;
+					clickFlag_ = 0;
+					selectWX_[1] = 1085;
+					selectWY_[1] = 330;
+				}
+
+			}
+			//下ブロック
+			if (mousePosX_ >= selectWX_[2] && mousePosX_ <= selectWX_[2] + selectWR_[2] &&
+				mousePosY_ >= selectWY_[2] && mousePosY_ <= selectWY_[2] + selectWR_[2] && !isWall[2])
+			{
+				selectWColor_[2] = RED;
+			}
+			else
+			{
+				selectWColor_[2] = WHITE;
+			}
+			if (clickFlag_ == 0) {
+				if (selectWColor_[2] == RED && Novice::IsPressMouse(0))
+				{
+					isWall[2] = true;
+					clickFlag_ = 3;
+				}
+			}
+			if (clickFlag_ == 3) {
+				if (isWall[2])
+				{
+					selectWX_[2] = mousePosX_;
+					selectWY_[2] = mousePosY_;
+				}
+				// マップとブロックの配置判定
+				if (map1[leftTY[2]][leftTX[2]] == BACK && isWall[2] && selectWX_[2] <= 960)
+				{
+					backColor_[saveLeftTY[2]][saveLeftTX[2]] = WHITE;
+					backColor_[leftTY[2]][leftTX[2]] = RED;
+					saveLeftTX[2] = leftTX[2];
+					saveLeftTY[2] = leftTY[2];
+				}
+
+				if (Novice::IsPressMouse(1) && backColor_[leftTY[2]][leftTX[2]] == RED && map1[leftTY[2]][leftTX[2]] == BACK)
+				{
+					map1[leftTY[2]][leftTX[2]] = DOWN;
+					isWall[2] = false;
+					clickFlag_ = 0;
+					selectWX_[2] = 1085;
+					selectWY_[2] = 485;
+				}
+			}
+			//上ブロック
+			if (mousePosX_ >= selectWX_[3] && mousePosX_ <= selectWX_[3] + selectWR_[3] &&
+				mousePosY_ >= selectWY_[3] && mousePosY_ <= selectWY_[3] + selectWR_[3] && !isWall[3])
+			{
+				selectWColor_[3] = RED;
+			}
+			else
+			{
+				selectWColor_[3] = WHITE;
+			}
+			if (clickFlag_ == 0) {
+				if (selectWColor_[3] == RED && Novice::IsPressMouse(0))
+				{
+					isWall[3] = true;
+					clickFlag_ = 4;
+				}
+			}
+			if (clickFlag_ == 4) {
+				if (isWall[3])
+				{
+					selectWX_[3] = mousePosX_;
+					selectWY_[3] = mousePosY_;
+				}
+				// マップとブロックの配置判定
+				if (map1[leftTY[3]][leftTX[3]] == BACK && isWall[3] && selectWX_[3] <= 960)
+				{
+					backColor_[saveLeftTY[3]][saveLeftTX[3]] = WHITE;
+					backColor_[leftTY[3]][leftTX[3]] = RED;
+					saveLeftTX[3] = leftTX[3];
+					saveLeftTY[3] = leftTY[3];
+				}
+
+				if (Novice::IsPressMouse(1) && backColor_[leftTY[3]][leftTX[3]] == RED && map1[leftTY[3]][leftTX[3]] == BACK)
+				{
+					map1[leftTY[3]][leftTX[3]] = UP;
+					isWall[3] = false;
+					clickFlag_ = 0;
+					selectWX_[3] = 1085;
+					selectWY_[3] = 650;
+				}
+			}
 		}
 	}
 
 	// ステージ3
 	if (stageNo == STAGE3)
 	{
-		//ステージ外
-		for (int i = 0; i < 8; i++) {
-			if (deadFlag_ == 1) {
-				if (efectTimer_ <= 50) {
-					efectTimer_ += 1;
+		if (shakeFlag_ == 1) {
+			shakeRandX_ = update_;
+			shakeRandX_ = rand() % shakeRandX_ - 12;
+			shakeRandY_ = update_;
+			shakeRandY_ = rand() % shakeRandY_ - 12;
+			if (saveFlag_ == 25) {
+				a += 1;
+				if (a == 5) {
+					update_ -= 1;
+					a = 0;
 				}
+			}
+			if (update_ <= 0) {
+				shakeFlag_ = 2;
+				update_ = 24;
+			}
+		}
+		if (shakeFlag_ == 2) {
+			enemyColor -= 3;
+			for (int i = 0; i < 8; i++) {
 				if (efectTimer_ >= 50) {
 					if (efectFlag_[i] == 1) {
 
-						if (Timer_[i] <= 10) {
+						if (Timer_[i] <= 3000) {
 							Timer_[i] += 1;
-							efectPosX_[0] += 1;
-							efectPosX_[1] -= 1;
-							efectPosY_[2] += 1;
-							efectPosY_[3] -= 1;
+							efectPosX_[0] += 0.5f;
+							efectPosX_[1] -= 0.5f;
+							efectPosY_[2] += 0.5f;
+							efectPosY_[3] -= 0.5f;
 
-							efectPosX_[4] += 1;
-							efectPosY_[4] += 1;
-							efectPosX_[5] -= 1;
-							efectPosY_[5] -= 1;
-							efectPosX_[6] -= 1;
-							efectPosY_[6] += 1;
-							efectPosX_[7] += 1;
-							efectPosY_[7] -= 1;
+							efectPosX_[4] += 0.5f;
+							efectPosY_[4] += 0.5f;
+							efectPosX_[5] -= 0.5f;
+							efectPosY_[5] -= 0.5f;
+							efectPosX_[6] -= 0.5f;
+							efectPosY_[6] += 0.5f;
+							efectPosX_[7] += 0.5f;
+							efectPosY_[7] -= 0.5f;
 						}
-						if (Timer_[i] >= 10) {
+						if (Timer_[i] >= 3000) {
 							efectFlag_[i] = 0;
 							Timer_[i] = 0;
 
@@ -1031,12 +1312,85 @@ void GameManager::Update(int stageNo, char keys[256])
 					}
 					else {
 						efectFlag_[i] = 1;
-						efectTimer_ = 0;
+						//efectTimer_ = 0;
 						for (int y = 0; y < mapCountY; y++) {
 							for (int x = 0; x < mapCountX; x++) {
 								if (map2[y][x] == ENEMY) {
-									efectPosX_[i] = x * Size;
-									efectPosY_[i] = y * Size;
+									efectPosX_[i] = (float(x * Size));
+									efectPosY_[i] = (float(y * Size));
+								}
+							}
+						}
+					}
+				}
+			}
+			if (enemyColor <= -255) {
+				enemyColor = -255;
+				shakeFlag_ = 3;
+			}
+		}
+
+		if (shakeFlag_ == 3) {
+			deadFlag_ = 2;
+		}
+
+		//エフェクト
+		for (int i = 0; i < 8; i++) {
+			randSave[0] = rand() % 4 + 1;
+			randSave[1] = rand() % 4 + 1;
+			randSave[2] = rand() % 4 + 1;
+			randSave[3] = rand() % 4 + 1;
+			randSave[4] = rand() % 7 + 5;
+			randSave[5] = rand() % 7 + 5;
+			randSave[6] = rand() % 7 + 5;
+			randSave[7] = rand() % 7 + 5;
+			if (deadFlag_ == 1) {
+				if (efectTimer_ <= 50) {
+					efectTimer_ += 1;
+
+					if (efectTimer_ >= 51) {
+						efectTimer_ -= 1;
+					}
+				}
+				if (efectTimer_ == 50) {
+
+					if (saveFlag_ <= 24) {
+						if (efectFlag_[i] == 1) {
+
+
+							if (Timer_[i] <= 15) {
+								Timer_[i] += 1;
+								efectPosX_[0] += 0.5f;
+								efectPosX_[1] -= 0.5f;
+								efectPosX_[2] += 1.0f;
+								efectPosX_[3] -= 1.0f;
+								efectPosX_[4] += 0.1f;
+								efectPosX_[5] -= 0.1f;
+								efectPosX_[6] += 1.5f;
+								efectPosX_[7] -= 1.5f;
+
+								efectPosY_[i] -= efectVelocity_[i];
+								efectVelocity_[i] -= efectAcceleration_[i];
+							}
+							if (Timer_[i] >= 15) {
+								efectFlag_[i] = 0;
+								Timer_[i] = 0;
+
+							}
+
+
+						}
+						else {
+							efectFlag_[i] = 1;
+							saveFlag_ += 1;
+							efectVelocity_[i] = (float(randSave[i]));
+							efectTimer_ = 0;
+							for (int y = 0; y < mapCountY; y++) {
+								for (int x = 0; x < mapCountX; x++) {
+									if (map2[y][x] == ENEMY) {
+										efectPosX_[i] = (float(x * Size));
+										efectPosY_[i] = (float(y * Size));
+									}
 								}
 							}
 						}
@@ -1053,6 +1407,8 @@ void GameManager::Update(int stageNo, char keys[256])
 
 						shotPosX_ = x * Size;
 						shotPosY_ = y * Size;
+						savePlayerPosX_ = shotPosX_;
+						savePlayerPosY_ = shotPosY_;
 					}
 				}
 				//壁の判定
@@ -1098,9 +1454,7 @@ void GameManager::Update(int stageNo, char keys[256])
 							if (map2[leftTopY_][leftTopX_] == BACK || map2[leftTopY_][leftTopX_] == PLAYER) {
 								setShotFlag_ = 1;
 							}
-							if (map2[leftBottomY_][leftBottomX_] == RIGHT) {
-								setShotFlag_ = 1;
-							}
+
 						}
 						if (map2[leftTopY_][leftTopX_] == UP || map2[leftTopY_][leftTopX_] == DOWN ||
 							map2[leftTopY_][leftTopX_] == LEFT) {
@@ -1287,144 +1641,172 @@ void GameManager::Update(int stageNo, char keys[256])
 
 			}
 		}
-
-		// マップとブロックの配置判定
-		if (map2[leftTY[0]][leftTX[0]] == BACK && isWall[0] && selectWX_[0] <= 960)
-		{
-			backColor_[saveLeftTY[0]][saveLeftTX[0]] = WHITE;
-			backColor_[leftTY[0]][leftTX[0]] = RED;
-			saveLeftTX[0] = leftTX[0];
-			saveLeftTY[0] = leftTY[0];
-		}
-
-		if (Novice::IsPressMouse(1) && backColor_[leftTY[0]][leftTX[0]] == RED)
-		{
-			map2[leftTY[0]][leftTX[0]] = LEFT;
-			isWall[0] = false;
-			clickFlag_ = 0;
-			selectWX_[0] = 1085;
-			selectWY_[0] = 165;
-		}
-
-		//右ブロック
-		if (mousePosX_ >= selectWX_[1] && mousePosX_ <= selectWX_[1] + selectWR_[1] &&
-			mousePosY_ >= selectWY_[1] && mousePosY_ <= selectWY_[1] + selectWR_[1] && !isWall[1])
-		{
-			selectWColor_[1] = RED;
-		}
-		else
-		{
-			selectWColor_[1] = 0xFF00FFFF;
-		}
-		if (clickFlag_ == 0) {
-			if (selectWColor_[1] == RED && Novice::IsPressMouse(0))
+		if (shotFlag_ == 0) {
+			//左ブロック
+			if (mousePosX_ >= selectWX_[0] && mousePosX_ <= selectWX_[0] + selectWR_[0] &&
+				mousePosY_ >= selectWY_[0] && mousePosY_ <= selectWY_[0] + selectWR_[0] && !isWall[0])
 			{
-				isWall[1] = true;
-				clickFlag_ = 1;
+				selectWColor_[0] = RED;
 			}
-		}
-		if (isWall[1])
-		{
-			selectWX_[1] = mousePosX_;
-			selectWY_[1] = mousePosY_;
-		}
-		// マップとブロックの配置判定
-		if (map2[leftTY[1]][leftTX[1]] == BACK && isWall[1] && selectWX_[1] <= 960)
-		{
-			backColor_[saveLeftTY[1]][saveLeftTX[1]] = WHITE;
-			backColor_[leftTY[1]][leftTX[1]] = RED;
-			saveLeftTX[1] = leftTX[1];
-			saveLeftTY[1] = leftTY[1];
-		}
-
-		if (Novice::IsPressMouse(1) && backColor_[leftTY[1]][leftTX[1]] == RED)
-		{
-			map2[leftTY[1]][leftTX[1]] = RIGHT;
-			isWall[1] = false;
-			clickFlag_ = 0;
-			selectWX_[1] = 1085;
-			selectWY_[1] = 330;
-		}
-
-
-		//下ブロック
-		if (mousePosX_ >= selectWX_[2] && mousePosX_ <= selectWX_[2] + selectWR_[2] &&
-			mousePosY_ >= selectWY_[2] && mousePosY_ <= selectWY_[2] + selectWR_[2] && !isWall[2])
-		{
-			selectWColor_[2] = RED;
-		}
-		else
-		{
-			selectWColor_[2] = 0xCC00FFFF;
-		}
-		if (clickFlag_ == 0) {
-			if (selectWColor_[2] == RED && Novice::IsPressMouse(0))
+			else
 			{
-				isWall[2] = true;
-				clickFlag_ = 1;
+				selectWColor_[0] = WHITE;
 			}
-		}
-		if (isWall[2])
-		{
-			selectWX_[2] = mousePosX_;
-			selectWY_[2] = mousePosY_;
-		}
-		// マップとブロックの配置判定
-		if (map2[leftTY[2]][leftTX[2]] == BACK && isWall[2] && selectWX_[2] <= 960)
-		{
-			backColor_[saveLeftTY[2]][saveLeftTX[2]] = WHITE;
-			backColor_[leftTY[2]][leftTX[2]] = RED;
-			saveLeftTX[2] = leftTX[2];
-			saveLeftTY[2] = leftTY[2];
-		}
+			if (clickFlag_ == 0) {
+				if (selectWColor_[0] == RED && Novice::IsPressMouse(0))
+				{
+					isWall[0] = true;
+					clickFlag_ = 1;
+				}
+			}
+			if (clickFlag_ == 1) {
+				if (isWall[0])
+				{
+					selectWX_[0] = mousePosX_;
+					selectWY_[0] = mousePosY_;
+				}
+				// マップとブロックの配置判定
+				if (map2[leftTY[0]][leftTX[0]] == BACK && isWall[0] && selectWX_[0] <= 960)
+				{
+					backColor_[saveLeftTY[0]][saveLeftTX[0]] = WHITE;
+					backColor_[leftTY[0]][leftTX[0]] = RED;
+					saveLeftTX[0] = leftTX[0];
+					saveLeftTY[0] = leftTY[0];
+				}
 
-		if (Novice::IsPressMouse(1) && backColor_[leftTY[2]][leftTX[2]] == RED)
-		{
-			map2[leftTY[2]][leftTX[2]] = DOWN;
-			isWall[2] = false;
-			clickFlag_ = 0;
-			selectWX_[2] = 1085;
-			selectWY_[2] = 485;
-		}
-
-		//上ブロック
-		if (mousePosX_ >= selectWX_[3] && mousePosX_ <= selectWX_[3] + selectWR_[3] &&
-			mousePosY_ >= selectWY_[3] && mousePosY_ <= selectWY_[3] + selectWR_[3] && !isWall[3])
-		{
-			selectWColor_[3] = RED;
-		}
-		else
-		{
-			selectWColor_[3] = BLUE;
-		}
-		if (clickFlag_ == 0) {
-			if (selectWColor_[3] == RED && Novice::IsPressMouse(0))
+				if (Novice::IsPressMouse(1) && backColor_[leftTY[0]][leftTX[0]] == RED && map2[leftTY[0]][leftTX[0]] == BACK)
+				{
+					map2[leftTY[0]][leftTX[0]] = LEFT;
+					isWall[0] = false;
+					clickFlag_ = 0;
+					selectWX_[0] = 1085;
+					selectWY_[0] = 165;
+				}
+			}
+			//右ブロック
+			if (mousePosX_ >= selectWX_[1] && mousePosX_ <= selectWX_[1] + selectWR_[1] &&
+				mousePosY_ >= selectWY_[1] && mousePosY_ <= selectWY_[1] + selectWR_[1] && !isWall[1])
 			{
-				isWall[3] = true;
-				clickFlag_ = 1;
+				selectWColor_[1] = RED;
 			}
-		}
-		if (isWall[3])
-		{
-			selectWX_[3] = mousePosX_;
-			selectWY_[3] = mousePosY_;
-		}
-		// マップとブロックの配置判定
-		if (map2[leftTY[3]][leftTX[3]] == BACK && isWall[3] && selectWX_[3] <= 960)
-		{
-			backColor_[saveLeftTY[3]][saveLeftTX[3]] = WHITE;
-			backColor_[leftTY[3]][leftTX[3]] = RED;
-			saveLeftTX[3] = leftTX[3];
-			saveLeftTY[3] = leftTY[3];
-		}
+			else
+			{
+				selectWColor_[1] = WHITE;
+			}
+			if (clickFlag_ == 0) {
+				if (selectWColor_[1] == RED && Novice::IsPressMouse(0))
+				{
+					isWall[1] = true;
+					clickFlag_ = 2;
+				}
+			}
+			if (clickFlag_ == 2) {
+				if (isWall[1])
+				{
+					selectWX_[1] = mousePosX_;
+					selectWY_[1] = mousePosY_;
+				}
+				// マップとブロックの配置判定
+				if (map2[leftTY[1]][leftTX[1]] == BACK && isWall[1] && selectWX_[1] <= 960)
+				{
+					backColor_[saveLeftTY[1]][saveLeftTX[1]] = WHITE;
+					backColor_[leftTY[1]][leftTX[1]] = RED;
+					saveLeftTX[1] = leftTX[1];
+					saveLeftTY[1] = leftTY[1];
+				}
 
-		if (Novice::IsPressMouse(1) && backColor_[leftTY[3]][leftTX[3]] == RED)
-		{
-			map2[leftTY[3]][leftTX[3]] = UP;
-			isWall[3] = false;
-			clickFlag_ = 0;
-			selectWX_[3] = 1085;
-			selectWY_[3] = 650;
+				if (Novice::IsPressMouse(1) && backColor_[leftTY[1]][leftTX[1]] == RED && map2[leftTY[1]][leftTX[1]] == BACK)
+				{
+					map2[leftTY[1]][leftTX[1]] = RIGHT;
+					isWall[1] = false;
+					clickFlag_ = 0;
+					selectWX_[1] = 1085;
+					selectWY_[1] = 330;
+				}
+
+			}
+			//下ブロック
+			if (mousePosX_ >= selectWX_[2] && mousePosX_ <= selectWX_[2] + selectWR_[2] &&
+				mousePosY_ >= selectWY_[2] && mousePosY_ <= selectWY_[2] + selectWR_[2] && !isWall[2])
+			{
+				selectWColor_[2] = RED;
+			}
+			else
+			{
+				selectWColor_[2] = WHITE;
+			}
+			if (clickFlag_ == 0) {
+				if (selectWColor_[2] == RED && Novice::IsPressMouse(0))
+				{
+					isWall[2] = true;
+					clickFlag_ = 3;
+				}
+			}
+			if (clickFlag_ == 3) {
+				if (isWall[2])
+				{
+					selectWX_[2] = mousePosX_;
+					selectWY_[2] = mousePosY_;
+				}
+				// マップとブロックの配置判定
+				if (map2[leftTY[2]][leftTX[2]] == BACK && isWall[2] && selectWX_[2] <= 960)
+				{
+					backColor_[saveLeftTY[2]][saveLeftTX[2]] = WHITE;
+					backColor_[leftTY[2]][leftTX[2]] = RED;
+					saveLeftTX[2] = leftTX[2];
+					saveLeftTY[2] = leftTY[2];
+				}
+
+				if (Novice::IsPressMouse(1) && backColor_[leftTY[2]][leftTX[2]] == RED && map2[leftTY[2]][leftTX[2]] == BACK)
+				{
+					map2[leftTY[2]][leftTX[2]] = DOWN;
+					isWall[2] = false;
+					clickFlag_ = 0;
+					selectWX_[2] = 1085;
+					selectWY_[2] = 485;
+				}
+			}
+			//上ブロック
+			if (mousePosX_ >= selectWX_[3] && mousePosX_ <= selectWX_[3] + selectWR_[3] &&
+				mousePosY_ >= selectWY_[3] && mousePosY_ <= selectWY_[3] + selectWR_[3] && !isWall[3])
+			{
+				selectWColor_[3] = RED;
+			}
+			else
+			{
+				selectWColor_[3] = WHITE;
+			}
+			if (clickFlag_ == 0) {
+				if (selectWColor_[3] == RED && Novice::IsPressMouse(0))
+				{
+					isWall[3] = true;
+					clickFlag_ = 4;
+				}
+			}
+			if (clickFlag_ == 4) {
+				if (isWall[3])
+				{
+					selectWX_[3] = mousePosX_;
+					selectWY_[3] = mousePosY_;
+				}
+				// マップとブロックの配置判定
+				if (map2[leftTY[3]][leftTX[3]] == BACK && isWall[3] && selectWX_[3] <= 960)
+				{
+					backColor_[saveLeftTY[3]][saveLeftTX[3]] = WHITE;
+					backColor_[leftTY[3]][leftTX[3]] = RED;
+					saveLeftTX[3] = leftTX[3];
+					saveLeftTY[3] = leftTY[3];
+				}
+
+				if (Novice::IsPressMouse(1) && backColor_[leftTY[3]][leftTX[3]] == RED && map2[leftTY[3]][leftTX[3]] == BACK)
+				{
+					map2[leftTY[3]][leftTX[3]] = UP;
+					isWall[3] = false;
+					clickFlag_ = 0;
+					selectWX_[3] = 1085;
+					selectWY_[3] = 650;
+				}
+			}
 		}
 	}
 
@@ -1519,6 +1901,10 @@ void GameManager::Update(int stageNo, char keys[256])
 	}
 
 	// ゲームオーバー処理
+	if (keys[DIK_O])
+	{
+		gameOver_->SetFIn(true);
+	}
 }
 
 
@@ -1526,11 +1912,9 @@ void GameManager::Draw(int stageNo)
 {
 	stageNumber = stageNo;
 
-	for (int y = 0; y < mapCountY; y++) {
-		for (int x = 0; x < mapCountX; x++) {
-
-			if (stageNumber == STAGE1) {
-
+	if (stageNumber == STAGE1) {
+		for (int y = 0; y < mapCountY; y++) {
+			for (int x = 0; x < mapCountX; x++) {
 				// 背景
 				if (map0[y][x] == BACK) {
 					Novice::DrawSprite(x * Size, y * Size, back, 1, 1, 0, backColor_[y][x]);
@@ -1540,7 +1924,20 @@ void GameManager::Draw(int stageNo)
 				if (map0[y][x] == WALL) {
 					Novice::DrawSprite(x * Size, y * Size, wall, 1, 1, 0, WHITE);
 				}
-
+			}
+		}
+		if (shakeFlag_ == 1 || shakeFlag_ == 2) {
+			for (int i = 0; i < 8; i++) {
+				if (efectFlag_[i] == 1) {
+					if (efectTimer_ >= 50) {
+						Novice::DrawSprite((int)efectPosX_[i] + 16, (int)efectPosY_[i] + 16, wall, 0.4f, 0.4f, 0, 0xFF00FFFF);
+					}
+				}
+			}
+		}
+		for (int y = 0; y < mapCountY; y++) {
+			for (int x = 0; x < mapCountX; x++) {
+				// プレイヤー
 				if (map0[y][x] == PLAYER) {
 					Novice::DrawSprite(x * Size, y * Size, player, 2, 2, 0, WHITE);
 				}
@@ -1561,86 +1958,203 @@ void GameManager::Draw(int stageNo)
 					Novice::DrawSprite(x * Size, y * Size, left, 2, 2, 0, WHITE);
 				}
 
-				Novice::DrawSprite(960, 0, panel, 1, 1, 0, WHITE);
+				// エネミー
+				if (map0[y][x] == ENEMY) {
+					Novice::DrawSprite(x * Size - shakeRandX_, y * Size - shakeRandY_, enemy, 1, 1, 0, enemyColor);
+
+				}
 			}
+		}
+		if (shotFlag_ == 0) {
+			// プレイヤーの向き
+			if (shotMove_ == 1) // 左向き
+			{
+				Novice::DrawSprite(savePlayerPosX_ - 64, savePlayerPosY_, leftAllow, 1, 1, 0, WHITE);
+			}
+			if (shotMove_ == 2) // 右向き
+			{
+				Novice::DrawSprite(savePlayerPosX_ + 64, savePlayerPosY_, rightAllow, 1, 1, 0, WHITE);
+			}
+			if (shotMove_ == 3) // 上向き
+			{
+				Novice::DrawSprite(savePlayerPosX_, savePlayerPosY_ - 64, upAllow, 1, 1, 0, WHITE);
+			}
+			if (shotMove_ == 4) // 下向き
+			{
+				Novice::DrawSprite(savePlayerPosX_, savePlayerPosY_ + 64, downAllow, 1, 1, 0, WHITE);
+			}
+		}
+		// 選択欄
+		Novice::DrawSprite(960, 0, panel, 1, 1, 0, WHITE);
+	}
 
-			if (stageNumber == STAGE2) {
-
+	if (stageNumber == STAGE2) {
+		for (int y = 0; y < mapCountY; y++) {
+			for (int x = 0; x < mapCountX; x++) {
 				// 背景
 				if (map1[y][x] == BACK) {
-					Novice::DrawSprite(x * Size, y * Size, back, 2, 2, 0, backColor_[y][x]);
+					Novice::DrawSprite(x * Size, y * Size, back, 1, 1, 0, backColor_[y][x]);
 				}
 
 				// 壁
 				if (map1[y][x] == WALL) {
-					Novice::DrawSprite(x * Size, y * Size, wall, 2, 2, 0, WHITE);
+					Novice::DrawSprite(x * Size, y * Size, wall, 1, 1, 0, WHITE);
 				}
-
-				if (map1[y][x] == PLAYER) {
-					Novice::DrawSprite(x * Size, y * Size, wall, 2, 2, 0, RED);
-				}
-				if (map1[y][x] == UP) {
-					Novice::DrawSprite(x * Size, y * Size, wall, 2, 2, 0, BLUE);
-				}
-				if (map1[y][x] == RIGHT) {
-					Novice::DrawSprite(x * Size, y * Size, wall, 2, 2, 0, 0xFF00FFFF);
-				}
-				if (map1[y][x] == LEFT) {
-					Novice::DrawSprite(x * Size, y * Size, wall, 2, 2, 0, 0x00FFFFFF);
-				}
-				if (map1[y][x] == DOWN) {
-					Novice::DrawSprite(x * Size, y * Size, wall, 2, 2, 0, 0xCC00FFFF);
-				}
-
 			}
+		}
+		if (shakeFlag_ == 1 || shakeFlag_ == 2) {
+			for (int i = 0; i < 8; i++) {
+				if (efectFlag_[i] == 1) {
+					if (efectTimer_ >= 50) {
+						Novice::DrawSprite((int)efectPosX_[i] + 16, (int)efectPosY_[i] + 16, wall, 0.4f, 0.4f, 0, 0xFF00FFFF);
+					}
+				}
+			}
+		}
+		for (int y = 0; y < mapCountY; y++) {
+			for (int x = 0; x < mapCountX; x++) {
+				// プレイヤー
+				if (map1[y][x] == PLAYER) {
+					Novice::DrawSprite(x * Size, y * Size, player, 2, 2, 0, WHITE);
+				}
+				// 上
+				if (map1[y][x] == UP) {
+					Novice::DrawSprite(x * Size, y * Size, up, 2, 2, 0, WHITE);
+				}
+				// 下
+				if (map1[y][x] == DOWN) {
+					Novice::DrawSprite(x * Size, y * Size, down, 2, 2, 0, WHITE);
+				}
+				// 右
+				if (map1[y][x] == RIGHT) {
+					Novice::DrawSprite(x * Size, y * Size, right, 2, 2, 0, WHITE);
+				}
+				// 左
+				if (map1[y][x] == LEFT) {
+					Novice::DrawSprite(x * Size, y * Size, left, 2, 2, 0, WHITE);
+				}
+				// エネミー
+				if (map1[y][x] == ENEMY) {
+					Novice::DrawSprite(x * Size - shakeRandX_, y * Size - shakeRandY_, enemy, 1, 1, 0, enemyColor);
+				}
+			}
+		}
+		if (shotFlag_ == 0) {
+			// プレイヤーの向き
+			if (shotMove_ == 1) // 左向き
+			{
+				Novice::DrawSprite(savePlayerPosX_ - 64, savePlayerPosY_, leftAllow, 1, 1, 0, WHITE);
+			}
+			if (shotMove_ == 2) // 右向き
+			{
+				Novice::DrawSprite(savePlayerPosX_ + 64, savePlayerPosY_, rightAllow, 1, 1, 0, WHITE);
+			}
+			if (shotMove_ == 3) // 上向き
+			{
+				Novice::DrawSprite(savePlayerPosX_, savePlayerPosY_ - 64, upAllow, 1, 1, 0, WHITE);
+			}
+			if (shotMove_ == 4) // 下向き
+			{
+				Novice::DrawSprite(savePlayerPosX_, savePlayerPosY_ + 64, downAllow, 1, 1, 0, WHITE);
+			}
+		}
+		// 選択欄
+		Novice::DrawSprite(960, 0, panel, 1, 1, 0, WHITE);
 
-			if (stageNumber == STAGE3) {
+	}
 
+	if (stageNumber == STAGE3) {
+		for (int y = 0; y < mapCountY; y++) {
+			for (int x = 0; x < mapCountX; x++) {
 				// 背景
 				if (map2[y][x] == BACK) {
-					Novice::DrawSprite(x * Size, y * Size, back, 2, 2, 0, backColor_[y][x]);
+					Novice::DrawSprite(x * Size, y * Size, back, 1, 1, 0, backColor_[y][x]);
 				}
 
 				// 壁
 				if (map2[y][x] == WALL) {
-					Novice::DrawSprite(x * Size, y * Size, wall, 2, 2, 0, WHITE);
+					Novice::DrawSprite(x * Size, y * Size, wall, 1, 1, 0, WHITE);
 				}
-
+			}
+		}
+		if (shakeFlag_ == 1 || shakeFlag_ == 2) {
+			for (int i = 0; i < 8; i++) {
+				if (efectFlag_[i] == 1) {
+					if (efectTimer_ >= 50) {
+						Novice::DrawSprite((int)efectPosX_[i] + 16, (int)efectPosY_[i] + 16, wall, 0.4f, 0.4f, 0, 0xFF00FFFF);
+					}
+				}
+			}
+		}
+		for (int y = 0; y < mapCountY; y++) {
+			for (int x = 0; x < mapCountX; x++) {
+				// プレイヤー
 				if (map2[y][x] == PLAYER) {
-					Novice::DrawSprite(x * Size, y * Size, wall, 2, 2, 0, RED);
+					Novice::DrawSprite(x * Size, y * Size, player, 2, 2, 0, WHITE);
 				}
+				// 上
 				if (map2[y][x] == UP) {
-					Novice::DrawSprite(x * Size, y * Size, wall, 2, 2, 0, BLUE);
+					Novice::DrawSprite(x * Size, y * Size, up, 2, 2, 0, WHITE);
 				}
-				if (map2[y][x] == RIGHT) {
-					Novice::DrawSprite(x * Size, y * Size, wall, 2, 2, 0, 0xFF00FFFF);
-				}
-				if (map2[y][x] == LEFT) {
-					Novice::DrawSprite(x * Size, y * Size, wall, 2, 2, 0, 0x00FFFFFF);
-				}
+				// 下
 				if (map2[y][x] == DOWN) {
-					Novice::DrawSprite(x * Size, y * Size, wall, 2, 2, 0, 0xCC00FFFF);
+					Novice::DrawSprite(x * Size, y * Size, down, 2, 2, 0, WHITE);
+				}
+				// 右
+				if (map2[y][x] == RIGHT) {
+					Novice::DrawSprite(x * Size, y * Size, right, 2, 2, 0, WHITE);
+				}
+				// 左
+				if (map2[y][x] == LEFT) {
+					Novice::DrawSprite(x * Size, y * Size, left, 2, 2, 0, WHITE);
+				}
+				// エネミー
+				if (map2[y][x] == ENEMY) {
+					Novice::DrawSprite(x * Size - shakeRandX_, y * Size - shakeRandY_, enemy, 1, 1, 0, enemyColor);
 				}
 			}
 		}
-	}
-
-	for (int i = 0; i < 8; i++) {
-		if (efectFlag_[i] == 1) {
-			if (efectTimer_ >= 50) {
-				Novice::DrawSprite(efectPosX_[i] + 16, efectPosY_[i] + 16, wall, 0.5f, 0.5f, 0, 0xFF00FFFF);
+		if (shotFlag_ == 0) {
+			// プレイヤーの向き
+			if (shotMove_ == 1) // 左向き
+			{
+				Novice::DrawSprite(savePlayerPosX_ - 64, savePlayerPosY_, leftAllow, 1, 1, 0, WHITE);
+			}
+			if (shotMove_ == 2) // 右向き
+			{
+				Novice::DrawSprite(savePlayerPosX_ + 64, savePlayerPosY_, rightAllow, 1, 1, 0, WHITE);
+			}
+			if (shotMove_ == 3) // 上向き
+			{
+				Novice::DrawSprite(savePlayerPosX_, savePlayerPosY_ - 64, upAllow, 1, 1, 0, WHITE);
+			}
+			if (shotMove_ == 4) // 下向き
+			{
+				Novice::DrawSprite(savePlayerPosX_, savePlayerPosY_ + 64, downAllow, 1, 1, 0, WHITE);
 			}
 		}
+
+		// 選択欄
+		Novice::DrawSprite(960, 0, panel, 1, 1, 0, WHITE);
+
 	}
 
-	Novice::ScreenPrintf(1000, 0, "map[%d][%d]", leftTY, leftTX);
-	Novice::ScreenPrintf(1000, 20, "saveMap[%d][%d]", saveLeftTY, saveLeftTX);
+	//Novice::ScreenPrintf(1000, 0, "map[%d][%d]", leftTY, leftTX);
+	//Novice::ScreenPrintf(1000, 20, "saveMap[%d][%d]", saveLeftTY, saveLeftTX);
 
 	Novice::ScreenPrintf(1000, 40, "laserMove : %d", shotMove_);
 	Novice::ScreenPrintf(1000, 60, "colision : %d", collisionFlag_);
-	Novice::ScreenPrintf(1000, 80, "click : %d", clickFlag_);
+	Novice::ScreenPrintf(1000, 80, "randsave : %d", randSave[1]);
 	Novice::ScreenPrintf(1000, 100, "LEFT,RIGHT,DOWN,UP");
+	Novice::ScreenPrintf(1000, 120, "saveFlag : %d", saveFlag_);
+	Novice::ScreenPrintf(1000, 140, "efectTimer : %d", efectTimer_);
+	Novice::ScreenPrintf(1000, 160, "color : %d", enemyColor);
+	Novice::ScreenPrintf(1000, 260, "update : %d", update_);
 
+	Novice::ScreenPrintf(1000, 220, "efectX : %d", efectPosX_[0]);
+	Novice::ScreenPrintf(1000, 240, "efectY : %f", efectPosY_[0]);
+	Novice::ScreenPrintf(1000, 200, "velo : %f", efectVelocity_[0]);
+	Novice::ScreenPrintf(1000, 180, "acc : %f", efectAcceleration_[0]);
 	for (int i = 0; i < 4; i++) {
 		Novice::DrawBox(selectWX_[i], selectWY_[i], selectWR_[i], selectWR_[i], 0.f, selectWColor_[i], kFillModeSolid);
 	}
@@ -1652,6 +2166,7 @@ void GameManager::Draw(int stageNo)
 		Novice::DrawSprite(shotPosX_, shotPosY_, wall, 1.0f, 1.0f, 0.0f, GREEN);
 
 	}
+
 }
 
 void GameManager::MapReset()

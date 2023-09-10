@@ -1,5 +1,6 @@
 ﻿#include <Novice.h>
 #include "GameClear.h"
+#include "GameOver.h"
 
 #pragma once
 class GameManager
@@ -17,6 +18,11 @@ public:
 	GameClear* GetGameClear()
 	{
 		return gameClear_;
+	}
+
+	GameOver* GetGameOver()
+	{
+		return gameOver_;
 	}
 
 private:
@@ -49,7 +55,7 @@ private:
 	int map0[12][15] = {
 	  {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},  // 0
 	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 1
-	  {2,0,0,0,0,0,0,0,0,0,0,0,8,0,2},  // 2
+	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 2
 	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 3
 	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 4
 	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 5
@@ -57,43 +63,43 @@ private:
 	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 7
 	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 8
 	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 9
-	  {2,1,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 10
+	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 10
 	  {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},  // 11
 	};
 
 	int initializeMap0[12][15] = {
 	  {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},  // 0
-	  {2,0,0,0,0,0,0,0,0,0,0,0,2,2,2},  // 1
-	  {2,0,0,0,0,0,0,0,0,0,0,0,8,2,2},  // 2
-	  {2,0,0,0,0,0,0,0,0,0,0,0,2,2,2},  // 3
-	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 4
+	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 1
+	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 2
+	  {2,0,0,0,0,0,2,8,2,0,0,0,0,0,2},  // 3
+	  {2,0,0,0,0,0,2,2,2,0,0,0,0,0,2},  // 4
 	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 5
-	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 6
+	  {2,0,2,2,2,0,0,0,0,0,2,2,2,0,2},  // 6
 	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 7
 	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 8
-	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 9
-	  {2,1,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 10
+	  {2,0,0,0,0,0,2,0,2,0,0,0,0,0,2},  // 9
+	  {2,0,0,0,0,0,0,1,0,0,0,0,0,0,2},  // 10
 	  {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},  // 11
 	};
 
 	int map1[12][15] = {
 	  {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},  // 0
-	  {2,0,0,2,0,0,0,0,0,0,0,0,0,0,2},  // 1
-	  {2,0,0,2,0,0,0,0,0,0,0,0,0,0,2},  // 2
-	  {2,0,0,2,0,0,0,0,0,0,0,0,0,0,2},  // 3
-	  {2,0,0,2,0,0,0,0,0,0,0,0,0,0,2},  // 4
-	  {2,0,0,2,0,0,0,0,0,0,0,0,0,0,2},  // 5
-	  {2,0,0,2,0,0,0,0,0,0,0,0,0,0,2},  // 6
-	  {2,0,0,2,0,0,0,0,0,0,0,0,0,0,2},  // 7
-	  {2,0,0,2,0,0,0,0,0,0,0,0,0,0,2},  // 8
-	  {2,0,0,2,0,0,0,0,0,0,0,0,0,0,2},  // 9
-	  {2,1,0,2,0,0,0,0,0,0,0,0,0,0,2},  // 10
+	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 1
+	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 2
+	  {2,0,0,0,0,0,2,8,2,0,0,0,0,0,2},  // 3
+	  {2,0,0,0,0,0,2,2,2,0,0,0,0,0,2},  // 4
+	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 5
+	  {2,0,2,2,2,0,0,0,0,0,2,2,2,0,2},  // 6
+	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 7
+	  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,2},  // 8
+	  {2,0,0,0,0,0,2,0,2,0,0,0,0,0,2},  // 9
+	  {2,0,0,0,0,0,0,1,0,0,0,0,0,0,2},  // 10
 	  {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},  // 11
 	};
 
 	int initializeMap1[12][15] = {
 	  {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},  // 0
-	  {2,0,0,2,0,0,0,0,0,0,0,0,0,0,2},  // 1
+	  {2,8,0,2,0,0,0,0,0,0,0,0,0,0,2},  // 1
 	  {2,0,0,2,0,0,0,0,0,0,0,0,0,0,2},  // 2
 	  {2,0,0,2,0,0,0,0,0,0,0,0,0,0,2},  // 3
 	  {2,0,0,2,0,0,0,0,0,0,0,0,0,0,2},  // 4
@@ -145,7 +151,7 @@ private:
 		LEFT,    // 5 左
 		DOWN,    // 6 下
 		CLEAR,
-		ENEMY
+		ENEMY,
 	};
 
 	// マウス
@@ -181,37 +187,56 @@ private:
 	int collisionFlag_;//判定をとるフラグ
 	int setShotFlag_;//打つまでのフラグ
 
-	// エフェクト変数と敵
-	int judgeFlag_ = 0;
-	int deadFlag_ = 0;
-	int efectPosX_[20];
-	int efectPosY_[20];
-	int efectTimer_;
-	int efectFlag_[20];
-	int saveFlag_[20];
-	int Timer_[20];
+	// プレイヤーの向き
+	int savePlayerPosX_;
+	int savePlayerPosY_;
 
 	// フラグ
 	bool isWall[4];
 	int clickFlag_;
+	int judgeFlag_ = 0;
+
+	float efectPosX_[20];
+	float efectPosY_[20];
+	int efectTimer_;
+	int efectFlag_[20];
+	int saveFlag_;
+	int Timer_[20];
+	float efectVelocity_[20];
+	float efectAcceleration_[20];
+	int randSave[20];
+	int shakeRandX_ = 0;
+	int shakeRandY_ = 0;
+	int shakeTimer_ = 0;
+	int shakeFlag_ = 0;
+	int update_ = 24;
+	int enemyColor = 0;
+	int a = 0;
 
 	// フラグ
-
 	int back = 0;
 	int wall = 0;
+	int deadFlag_ = 0;
 
-	int player = Novice::LoadTexture("./Resource/images/player.png");
-	int enemy = Novice::LoadTexture("./Resource/images/enemy.png");
+	int player = 0;
+	int enemy = 0;
 
-	int vertical = Novice::LoadTexture("./Resource/images/vertical.png");
-	int side = Novice::LoadTexture("./Resource/images/side.png");
+	int vertical = 0;
+	int side = 0;
 
-	int up = Novice::LoadTexture("./Resource/images/up.png");
-	int down = Novice::LoadTexture("./Resource/images/down.png");
-	int right = Novice::LoadTexture("./Resource/images/right.png");
-	int left = Novice::LoadTexture("./Resource/images/left.png");
+	int up = 0;
+	int down = 0;
+	int right = 0;
+	int left = 0;
 
-	int panel = Novice::LoadTexture("./Resource/images/panel.png");
+	int upAllow = 0;
+	int downAllow = 0;
+	int rightAllow = 0;
+	int leftAllow = 0;
+
+	int panel = 0;
 
 	GameClear* gameClear_ = nullptr;
+
+	GameOver* gameOver_ = nullptr;
 };
