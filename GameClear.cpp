@@ -2,6 +2,9 @@
 
 void GameClear::Initialize()
 {
+	selectR_ = 0;
+	selectL_ = 0;
+
 	//テクスチャ
 	gameClear_ = Novice::LoadTexture("./Resource/images/stageClear.png");
 	retry_ = Novice::LoadTexture("./Resource/images/retry.png");

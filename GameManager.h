@@ -13,6 +13,8 @@ public:
 
 	void Initialize(int stageNo);
 
+	void InitializeTutorial();
+
 	void Update(int stageNo, char* keys, char* preKeys);
 
 	void Draw(int stageNo);
@@ -131,8 +133,8 @@ private:
 	  {2,0,2,2,2,2,2,2,2,2,2,2,2,0,2},  // 2
 	  {2,0,2,2,2,2,2,2,2,2,2,2,2,0,2},  // 3
 	  {2,0,2,2,2,2,2,2,2,2,2,2,2,0,2},  // 4
-	  {2,0,2,2,2,2,2,2,2,2,2,2,2,0,2},  // 5
-	  {2,0,2,2,2,2,2,8,2,2,2,2,2,0,2},  // 6
+	  {2,0,2,2,2,2,2,8,2,2,2,2,2,0,2},  // 5
+	  {2,0,2,2,2,2,2,0,2,2,2,2,2,0,2},  // 6
 	  {2,0,2,2,2,2,2,0,2,2,2,2,2,0,2},  // 7
 	  {2,0,2,2,2,2,2,0,2,2,2,2,2,0,2},  // 8
 	  {2,0,2,2,2,2,2,0,2,2,2,2,2,0,2},  // 9
@@ -241,6 +243,16 @@ private:
 		DOWN,    // 6 下
 		CLEAR,
 		ENEMY,
+		WARPPOINT1,//ワープポイント
+		WARPPOINT2,
+		WARPPOINT3,//ワープポイント2
+		WARPPOINT4,
+		SWITCH1,//スイッチ
+		SWITCH2,
+		SWITCH3,//スイッチ2
+		SWITCH4,
+		DOOR,//ドア
+		DOOR2,//ドア
 	};
 
 	// マウス
@@ -289,10 +301,15 @@ private:
 	int tutorialScene_ = 0;
 	bool isTutorial_ = 0;
 	// チュートリアルテクスチャ
-	int text[3] = {
+	int text[8] = {
 		Novice::LoadTexture("./Resource/images/text0.png"),
 		Novice::LoadTexture("./Resource/images/text1.png"),
 		Novice::LoadTexture("./Resource/images/text2.png"),
+		Novice::LoadTexture("./Resource/images/text3.png"),
+		Novice::LoadTexture("./Resource/images/text4.png"),
+		Novice::LoadTexture("./Resource/images/text5.png"),
+		Novice::LoadTexture("./Resource/images/text6.png"),
+		Novice::LoadTexture("./Resource/images/text7.png")
 	};
 	int mission[2] = {
 		Novice::LoadTexture("./Resource/images/mission1.png"),
@@ -363,6 +380,12 @@ private:
 	int enemyColor = 0;
 	int a = 0;
 
+	//個数制限
+	int rightBlockLimit = 0;
+	int leftBlockLimit = 0;
+	int upBlockLimit = 0;
+	int downBlockLimit = 0;
+
 	// フラグ
 	int back = 0;
 	int wall = 0;
@@ -378,11 +401,15 @@ private:
 	int down = 0;
 	int right = 0;
 	int left = 0;
-
 	int upAllow = 0;
 	int downAllow = 0;
 	int rightAllow = 0;
 	int leftAllow = 0;
+	int warpFlag = 0;
+	int warpTimer = 0;
+	int switchFlag_ = 0;
+	int switch_ = 0;
+	int switchTimer = 0;
 
 	int panel = 0;
 

@@ -52,6 +52,7 @@ void SceneManager::Update(char* keys, char* preKeys)
 		if (stageSelect_->GetGameClear()->IsSceneChange())
 		{
 			gameManager_->Initialize(stageSelect_->GetStageNo());
+			gameManager_->InitializeTutorial();
 			sceneNo_ = Game;
 		}
 
@@ -64,12 +65,13 @@ void SceneManager::Update(char* keys, char* preKeys)
 		gameManager_->GetGameOver()->Update(gameManager_->GetGameOver()->GetFIn());
 
 		// ゲームクリア処理
-		if (gameManager_->GetGameClear()->SelectR() && gameManager_->GetGameClear()->IsSceneChange()) {
+		if (gameManager_->GetGameClear()->SelectR() && gameManager_->GetGameClear()->IsSceneChange() && gameManager_->GetGameClear()->GetRad() >= 1400) {
 			sceneNo_ = StageSelectScene;
 			stageSelect_->Initialize();
 			gameManager_->GetGameClear()->Initialize();
 		}
 		if (gameManager_->GetGameClear()->SelectL() && gameManager_->GetGameClear()->GetRad() >= 1400) {
+			gameManager_->InitializeTutorial();
 			gameManager_->MapReset(stageSelect_->GetStageNo());
 		}
 		if (gameManager_->GetGameClear()->IsSceneChange() && gameManager_->GetGameClear()->GetRad() <= 0 && gameManager_->GetGameClear()->SelectL())
@@ -78,7 +80,7 @@ void SceneManager::Update(char* keys, char* preKeys)
 		}
 
 		// ゲームオーバー処理
-		if (gameManager_->GetGameOver()->SelectR() && gameManager_->GetGameOver()->IsSceneChange()) {
+		if (gameManager_->GetGameOver()->SelectR() && gameManager_->GetGameOver()->IsSceneChange() && gameManager_->GetGameClear()->GetRad() >= 1400) {
 			sceneNo_ = StageSelectScene;
 			stageSelect_->Initialize();
 			gameManager_->GetGameOver()->Initialize();
