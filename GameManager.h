@@ -410,6 +410,7 @@ private:
 	int switchFlag_ = 0;
 	int switch_ = 0;
 	int switchTimer = 0;
+	int textTimer_ = 0;
 
 	int panel = 0;
 

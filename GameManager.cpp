@@ -87,6 +87,7 @@ void GameManager::Initialize(int stageNo)
 	update_ = 24;
 	enemyColor = 0;
 	a = 0;
+	textTimer_ = 0;
 
 	// テクスチャ
 	back = Novice::LoadTexture("./Resource/images/floor.png");                      //背景
@@ -125,7 +126,6 @@ void GameManager::Initialize(int stageNo)
 
 	gameOver_ = new GameOver;
 	gameOver_->Initialize();
-
 }
 void GameManager::InitializeTutorial()
 {
@@ -174,6 +174,7 @@ void GameManager::InitializeTutorial()
 	enemyColor = WHITE;
 	a = 0;
 	deadFlag_ = 0;
+	textTimer_ = 0;
 }
 void GameManager::Update(int stageNo, char* keys, char* preKeys)
 {
@@ -207,45 +208,7 @@ void GameManager::Update(int stageNo, char* keys, char* preKeys)
 	if (shotPosX_ >= 860 || shotPosX_ <= 0) {
 		shotFlag_ = 0;
 	}
-	if (tutorialMap[leftTopY_][leftTopX_] == ENEMY || tutorialMap[rightTopY_][rightTopX_] == ENEMY) {
-		judgeFlag_ = 1;
-		deadFlag_ = 1;
-		shotFlag_ = 0;
-		shakeFlag_ = 1;
-	}
-	else {
-		judgeFlag_ = 0;
-	}
-
-	if (map0[leftTopY_][leftTopX_] == ENEMY || map0[rightTopY_][rightTopX_] == ENEMY) {
-		judgeFlag_ = 1;
-		deadFlag_ = 1;
-		shotFlag_ = 0;
-		shakeFlag_ = 1;
-	}
-	else {
-		judgeFlag_ = 0;
-	}
-
-	if (map1[leftTopY_][leftTopX_] == ENEMY || map1[rightTopY_][rightTopX_] == ENEMY) {
-		judgeFlag_ = 1;
-		deadFlag_ = 1;
-		shotFlag_ = 0;
-		shakeFlag_ = 1;
-	}
-	else {
-		judgeFlag_ = 0;
-	}
-
-	if (map2[leftTopY_][leftTopX_] == ENEMY || map2[rightTopY_][rightTopX_] == ENEMY) {
-		judgeFlag_ = 1;
-		deadFlag_ = 1;
-		shotFlag_ = 0;
-		shakeFlag_ = 1;
-	}
-	else {
-		judgeFlag_ = 0;
-	}
+	
 	// チュートリアル
 	if (stageNo == TUTORIAL)
 	{
@@ -256,9 +219,10 @@ void GameManager::Update(int stageNo, char* keys, char* preKeys)
 		////
 		if (!isTutorial_)
 		{
+			textTimer_ += 1;
 			if (tutorialScene_ == 0)
 			{
-				if (keys[DIK_SPACE] && preKeys[DIK_SPACE] == 0 && textCount_ < 3)
+				if (keys[DIK_SPACE] && preKeys[DIK_SPACE] == 0 && textCount_ < 3 && textTimer_ >= 150)
 				{
 					textCount_ += 1;
 					if (textCount_ >= 3)
@@ -279,7 +243,7 @@ void GameManager::Update(int stageNo, char* keys, char* preKeys)
 
 			if (tutorialScene_ == 1)
 			{
-				if (keys[DIK_SPACE] && preKeys[DIK_SPACE] == 0 && textCount_ < 6)
+				if (keys[DIK_SPACE] && preKeys[DIK_SPACE] == 0 && textCount_ < 6 && sBoxR_ <= 0)
 				{
 					textCount_ += 1;
 					if (textCount_ >= 6)
@@ -287,7 +251,7 @@ void GameManager::Update(int stageNo, char* keys, char* preKeys)
 						flagIn_ = true;
 					}
 				}
-				if (keys[DIK_SPACE] && preKeys[DIK_SPACE] == 0 && textCount_ < 8 && deadFlag_ == 2)
+				if (keys[DIK_SPACE] && preKeys[DIK_SPACE] == 0 && textCount_ < 8 && deadFlag_ == 2 && sBoxR_ <= 0)
 				{
 					textCount_ += 1;
 					if (textCount_ >= 8)
@@ -3471,7 +3435,7 @@ void GameManager::Draw(int stageNo)
 
 	Novice::ScreenPrintf(0, 0, "flagOut : %d", flagOut_);
 	Novice::ScreenPrintf(0, 20, "flagIn : %d", flagIn_);
-	Novice::ScreenPrintf(0, 40, "deadFlag : %d", deadFlag_);
+	Novice::ScreenPrintf(0, 40, "textTimer : %d", textTimer_);
 
 }
 
