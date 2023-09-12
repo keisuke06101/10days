@@ -160,6 +160,11 @@ public:
 		return isSceneChange_;
 	}
 
+	bool IsOpen()
+	{
+		return isOpen_;
+	}
+
 	int GetRad()
 	{
 		return sBoxR_;
@@ -174,6 +179,12 @@ public:
 	{
 		this->flagOut_ = flag;
 	}
+
+	void SetOpen(bool flag)
+	{
+		this->isOpen_ = flag;
+	}
+
 	void SetGameOver(bool isGameOver)
 	{
 		this->isGameClear_ = isGameOver;

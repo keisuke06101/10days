@@ -29,23 +29,29 @@ void SceneManager::Update(char* keys, char* preKeys)
 	case TitleScene:
 
 		title_->Update();
-
-		if (title_->GetIsStart() == true)
+		title_->GetGameClear()->Update(title_->GetGameClear()->GetFIn());
+		if (title_->GetGameClear()->IsSceneChange())
 		{
 			sceneNo_ = StageSelectScene;
-			gameManager_->Initialize();
+			gameManager_->Initialize(stageSelect_->GetStageNo());
 			
 		}
 		break;
 
 	case StageSelectScene:
 
-		stageSelect_->Update();
+		if (!title_->GetGameClear()->IsOpen() && !gameManager_->GetGameClear()->IsOpen() && !gameManager_->GetGameOver()->IsOpen())
+		{
+		    stageSelect_->Update();
+		}
+		// シーン遷移更新処理
 		gameManager_->GetGameClear()->Update(gameManager_->GetGameClear()->GetFIn());
 		gameManager_->GetGameOver()->Update(gameManager_->GetGameOver()->GetFIn());
-		if (stageSelect_->IsGameStart() == true)
+		title_->GetGameClear()->Update(title_->GetGameClear()->GetFIn());
+		stageSelect_->GetGameClear()->Update(stageSelect_->GetGameClear()->GetFIn());
+		if (stageSelect_->GetGameClear()->IsSceneChange())
 		{
-			gameManager_->Initialize();
+			gameManager_->Initialize(stageSelect_->GetStageNo());
 			sceneNo_ = Game;
 		}
 
@@ -53,7 +59,7 @@ void SceneManager::Update(char* keys, char* preKeys)
 
 	case Game:
 		
-		gameManager_->Update(stageSelect_->GetStageNo(), keys);
+		gameManager_->Update(stageSelect_->GetStageNo(), keys, preKeys);
 		gameManager_->GetGameClear()->Update(gameManager_->GetGameClear()->GetFIn());
 		gameManager_->GetGameOver()->Update(gameManager_->GetGameOver()->GetFIn());
 
@@ -64,7 +70,7 @@ void SceneManager::Update(char* keys, char* preKeys)
 			gameManager_->GetGameClear()->Initialize();
 		}
 		if (gameManager_->GetGameClear()->SelectL() && gameManager_->GetGameClear()->GetRad() >= 1400) {
-			gameManager_->MapReset();
+			gameManager_->MapReset(stageSelect_->GetStageNo());
 		}
 		if (gameManager_->GetGameClear()->IsSceneChange() && gameManager_->GetGameClear()->GetRad() <= 0 && gameManager_->GetGameClear()->SelectL())
 		{
@@ -78,13 +84,15 @@ void SceneManager::Update(char* keys, char* preKeys)
 			gameManager_->GetGameOver()->Initialize();
 		}
 		if (gameManager_->GetGameOver()->SelectL() && gameManager_->GetGameOver()->GetRad() >= 1400) {
-			gameManager_->MapReset();
+			gameManager_->MapReset(stageSelect_->GetStageNo());
 		}
 		if (gameManager_->GetGameOver()->IsSceneChange() && gameManager_->GetGameOver()->GetRad() <= 0 && gameManager_->GetGameOver()->SelectL())
 		{
 			gameManager_->GetGameOver()->Initialize();
 		}
 
+		// シーン遷移
+		stageSelect_->GetGameClear()->Update(stageSelect_->GetGameClear()->GetFIn());
 
 		break;
 	case GameClearScene:
@@ -110,15 +118,22 @@ void SceneManager::Draw()
 		
 		title_->Draw();
 
+		title_->GetGameClear()->Draw();
+
 		break;
 
 	case StageSelectScene:
 		
 		stageSelect_->Draw();
 
+		// シーン遷移描画
 		gameManager_->GetGameClear()->Draw();
 
 		gameManager_->GetGameOver()->Draw();
+
+		title_->GetGameClear()->Draw();
+
+		stageSelect_->GetGameClear()->Draw();
 
 		break;
 
@@ -130,6 +145,8 @@ void SceneManager::Draw()
 		gameManager_->GetGameClear()->Draw();
 		
 		gameManager_->GetGameOver()->Draw();
+
+		stageSelect_->GetGameClear()->Draw();
 
 		break;
 

@@ -166,6 +166,11 @@ public:
 		return sBoxR_;
 	}
 
+	bool IsOpen()
+	{
+		return isOpen_;
+	}
+
 	//セッター
 	void SetFIn(bool flag)
 	{

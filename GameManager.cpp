@@ -1,7 +1,7 @@
 ﻿#include "GameManager.h"
 #include <stdlib.h>
 
-void GameManager::Initialize()
+void GameManager::Initialize(int stageNo)
 {
 	shotFlag_ = 0;
 	shotPosX_ = 0;
@@ -17,14 +17,26 @@ void GameManager::Initialize()
 
 	for (int y = 0; y < mapCountY; y++) {
 		for (int x = 0; x < mapCountX; x++) {
-
+			// チュートリアル
+			if (stageNo == TUTORIAL)
+			{
+			   tutorialMap[y][x] = tutorialMapInitialize[y][x];
+			}
 			// ステージ１
-			map0[y][x] = initializeMap0[y][x];
+			if (stageNo == STAGE1)
+			{
+				map0[y][x] = initializeMap0[y][x];
+			}
 			// ステージ２
-			map1[y][x] = initializeMap1[y][x];
+			if (stageNo == STAGE2)
+			{
+			    map1[y][x] = initializeMap1[y][x];
+			}
 			// ステージ３
-			map2[y][x] = initializeMap2[y][x];
-
+			if (stageNo == STAGE3)
+			{
+				map2[y][x] = initializeMap2[y][x];
+			}
 			backColor_[y][x] = WHITE;
 		}
 	}
@@ -87,7 +99,7 @@ void GameManager::Initialize()
 	gameOver_->Initialize();
 
 }
-void GameManager::Update(int stageNo, char keys[256])
+void GameManager::Update(int stageNo, char* keys, char* preKeys)
 {
 
 	Novice::GetMousePosition(&mousePosX_, &mousePosY_);
@@ -119,6 +131,16 @@ void GameManager::Update(int stageNo, char keys[256])
 	if (shotPosX_ >= 860 || shotPosX_ <= 0) {
 		shotFlag_ = 0;
 	}
+	if (tutorialMap[leftTopY_][leftTopX_] == ENEMY || tutorialMap[rightTopY_][rightTopX_] == ENEMY) {
+		judgeFlag_ = 1;
+		deadFlag_ = 1;
+		shotFlag_ = 0;
+		shakeFlag_ = 1;
+	}
+	else {
+		judgeFlag_ = 0;
+	}
+
 	if (map0[leftTopY_][leftTopX_] == ENEMY || map0[rightTopY_][rightTopX_] == ENEMY) {
 		judgeFlag_ = 1;
 		deadFlag_ = 1;
@@ -148,9 +170,688 @@ void GameManager::Update(int stageNo, char keys[256])
 	else {
 		judgeFlag_ = 0;
 	}
+	// チュートリアル
+	if (stageNo == TUTORIAL)
+	{
+		////
+		if (!isTutorial_)
+		{
+			if (tutorialScene_ == 0)
+			{
+				if (keys[DIK_SPACE] && preKeys[DIK_SPACE] == 0 && textCount_ < 3)
+				{
+					textCount_ += 1;
+					if (textCount_ >= 3)
+					{
+						flagIn_ = true;
+					}
+				}
+				if (keys[DIK_SPACE] && preKeys[DIK_SPACE] == 0 && 
+					countL_ == 1 && countR_ == 1 && countU_ == 1 && countD_ == 1)
+				{
+					textCount_ += 1;
+					if (textCount_ >= 4)
+					{
+						isOpen_ = true;
+					}
+				}
+			}
+
+			if (tutorialScene_ == 1)
+			{
+				if (keys[DIK_SPACE] && preKeys[DIK_SPACE] == 0 && textCount_ < 5)
+				{
+					textCount_ += 1;
+					if (textCount_ >= 6)
+					{
+						flagIn_ = true;
+					}
+				}
+			}
+
+			// シーン遷移エフェクト処理
+			if (isOpen_ && !isClose_)
+			{
+				sBoxR_ += 10;
+			}
+			if (isClose_)
+			{
+				sBoxR_ -= 10;
+			}
+			if (sBoxR_ >= 1400)
+			{
+				flagIn_ = true;
+				isClose_ = true;
+			}
+			if (sBoxR_ <= 0 && isClose_)
+			{
+				isOpen_ = false;
+				isClose_ = false;
+				if (tutorialScene_ == 0)
+				{
+					tutorialScene_ = 1;
+					MapReset(stageNo);
+				}
+				else if (tutorialScene_ == 1)
+				{
+					tutorialScene_ = 2;
+				}
+			}
+
+			// イージング
+			if (flagIn_)
+			{
+				flame_++;
+				if (flame_ >= endFlame_)
+				{
+					flame_ = endFlame_;
+				}
+
+				t_ = flame_ / endFlame_;
+				menu_.easing.y = easeOutElastic(t_);
+				menu_.vel.y = menu_.easing.y * distance_;
+				menu_.pos.y = menu_.vel.y + (-240);
+			}
+
+			if (keys[DIK_C] && !flagIn_)
+			{
+				flagOut_ = true;
+			}
+			if (flagOut_)
+			{
+				flame_--;
+				t_ = flame_ / endFlame_;
+				menu_.easing.y = easeInOutBack(t_);
+				menu_.vel.y = menu_.easing.y * distance_;
+				menu_.pos.y = menu_.vel.y + (-240);
+			}
+
+			if (flame_ >= endFlame_ && flagIn_)
+			{
+				flagIn_ = false;
+			}
+
+			if (flame_ <= 0 && flagOut_)
+			{
+				flagOut_ = false;
+				isTutorial_ = true;
+			}
+		}
+		////
+		if (isTutorial_)
+		{
+			if (shakeFlag_ == 1) {
+				shakeRandX_ = update_;
+				shakeRandX_ = rand() % shakeRandX_ - 12;
+				shakeRandY_ = update_;
+				shakeRandY_ = rand() % shakeRandY_ - 12;
+				if (saveFlag_ == 25) {
+					a += 1;
+					if (a == 5) {
+						update_ -= 1;
+						a = 0;
+					}
+				}
+				if (update_ <= 0) {
+					shakeFlag_ = 2;
+					update_ = 24;
+				}
+			}
+			if (shakeFlag_ == 2) {
+				enemyColor -= 3;
+				for (int i = 0; i < 8; i++) {
+					if (efectTimer_ >= 50) {
+						if (efectFlag_[i] == 1) {
+
+							if (Timer_[i] <= 3000) {
+								Timer_[i] += 1;
+								efectPosX_[0] += 0.5f;
+								efectPosX_[1] -= 0.5f;
+								efectPosY_[2] += 0.5f;
+								efectPosY_[3] -= 0.5f;
+
+								efectPosX_[4] += 0.5f;
+								efectPosY_[4] += 0.5f;
+								efectPosX_[5] -= 0.5f;
+								efectPosY_[5] -= 0.5f;
+								efectPosX_[6] -= 0.5f;
+								efectPosY_[6] += 0.5f;
+								efectPosX_[7] += 0.5f;
+								efectPosY_[7] -= 0.5f;
+							}
+							if (Timer_[i] >= 3000) {
+								efectFlag_[i] = 0;
+								Timer_[i] = 0;
+
+							}
+						}
+						else {
+							efectFlag_[i] = 1;
+							//efectTimer_ = 0;
+							for (int y = 0; y < mapCountY; y++) {
+								for (int x = 0; x < mapCountX; x++) {
+									if (tutorialMap[y][x] == ENEMY) {
+										efectPosX_[i] = (float(x * Size));
+										efectPosY_[i] = (float(y * Size));
+									}
+								}
+							}
+						}
+					}
+				}
+				if (enemyColor <= -255) {
+					enemyColor = -255;
+					shakeFlag_ = 3;
+				}
+			}
+
+			if (shakeFlag_ == 3) {
+				deadFlag_ = 2;
+			}
+
+			//エフェクト
+			for (int i = 0; i < 8; i++) {
+				randSave[0] = rand() % 4 + 1;
+				randSave[1] = rand() % 4 + 1;
+				randSave[2] = rand() % 4 + 1;
+				randSave[3] = rand() % 4 + 1;
+				randSave[4] = rand() % 7 + 5;
+				randSave[5] = rand() % 7 + 5;
+				randSave[6] = rand() % 7 + 5;
+				randSave[7] = rand() % 7 + 5;
+				if (deadFlag_ == 1) {
+					if (efectTimer_ <= 50) {
+						efectTimer_ += 1;
+
+						if (efectTimer_ >= 51) {
+							efectTimer_ -= 1;
+						}
+					}
+					if (efectTimer_ == 50) {
+
+						if (saveFlag_ <= 24) {
+							if (efectFlag_[i] == 1) {
+
+
+								if (Timer_[i] <= 15) {
+									Timer_[i] += 1;
+									efectPosX_[0] += 0.5f;
+									efectPosX_[1] -= 0.5f;
+									efectPosX_[2] += 1.0f;
+									efectPosX_[3] -= 1.0f;
+									efectPosX_[4] += 0.1f;
+									efectPosX_[5] -= 0.1f;
+									efectPosX_[6] += 1.5f;
+									efectPosX_[7] -= 1.5f;
+
+									efectPosY_[i] -= efectVelocity_[i];
+									efectVelocity_[i] -= efectAcceleration_[i];
+								}
+								if (Timer_[i] >= 15) {
+									efectFlag_[i] = 0;
+									Timer_[i] = 0;
+
+								}
+
+
+							}
+							else {
+								efectFlag_[i] = 1;
+								saveFlag_ += 1;
+								efectVelocity_[i] = (float(randSave[i]));
+								efectTimer_ = 0;
+								for (int y = 0; y < mapCountY; y++) {
+									for (int x = 0; x < mapCountX; x++) {
+										if (tutorialMap[y][x] == ENEMY) {
+											efectPosX_[i] = (float(x * Size));
+											efectPosY_[i] = (float(y * Size));
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			// プレイヤー操作
+			for (int y = 0; y < mapCountY; y++) {
+				for (int x = 0; x < mapCountX; x++) {
+					if (tutorialMap[y][x] == PLAYER) {
+						if (shotFlag_ == 0) {
+
+							shotPosX_ = x * Size;
+							shotPosY_ = y * Size;
+							savePlayerPosX_ = shotPosX_;
+							savePlayerPosY_ = shotPosY_;
+						}
+					}
+
+					if (judgeFlag_ == 1) {
+						if (tutorialMap[y][x] == ENEMY) {
+							for (int i = 0; i < 8; i++) {
+								efectFlag_[i] = 1;
+								efectPosX_[i] = (float(x * Size));
+								efectPosY_[i] = (float(y * Size));
+
+							}
+						}
+					}
+					//壁の判定
+
+					//左
+					if (shotMove_ == 1) {
+						if (collisionFlag_ == 1) {
+							if (tutorialMap[leftTopY_][leftTopX_] == WALL) {
+								if (tutorialMap[rightTopY_][rightTopX_] == BACK || tutorialMap[rightTopY_][rightTopX_] == PLAYER) {
+									setShotFlag_ = 1;
+								}
+								if (tutorialMap[rightBottomY_][rightBottomX_] == LEFT) {
+									setShotFlag_ = 1;
+								}
+							}
+							if (tutorialMap[leftTopY_][leftTopX_] == UP || tutorialMap[rightBottomY_][rightBottomX_] == DOWN ||
+								tutorialMap[leftBottomY_][leftBottomX_] == RIGHT) {
+								setShotFlag_ = 2;
+							}
+						}
+
+						if (setShotFlag_ == 1) {
+							shotFlag_ = 0;
+							setShotFlag_ = 0;
+						}
+						if (setShotFlag_ == 2) {
+							setShotFlag_ = 0;
+						}
+
+						if (tutorialMap[leftTopY_][leftTopX_] == WALL) {
+							collisionFlag_ = 1;
+						}
+						else {
+							collisionFlag_ = 0;
+
+						}
+					}
+
+					//右
+					if (shotMove_ == 2) {
+						if (collisionFlag_ == 1) {
+							if (tutorialMap[rightTopY_][rightTopX_] == WALL) {
+								if (tutorialMap[leftTopY_][leftTopX_] == BACK || tutorialMap[leftTopY_][leftTopX_] == PLAYER) {
+									setShotFlag_ = 1;
+								}
+
+							}
+							if (tutorialMap[leftTopY_][leftTopX_] == UP || tutorialMap[leftTopY_][leftTopX_] == DOWN ||
+								tutorialMap[leftTopY_][leftTopX_] == LEFT) {
+								setShotFlag_ = 2;
+							}
+						}
+
+						if (setShotFlag_ == 1) {
+							shotFlag_ = 0;
+							setShotFlag_ = 0;
+						}
+						if (setShotFlag_ == 2) {
+							setShotFlag_ = 0;
+						}
+
+						if (tutorialMap[rightTopY_][rightTopX_] == WALL) {
+							collisionFlag_ = 1;
+						}
+						else {
+							collisionFlag_ = 0;
+						}
+
+					}
+
+					//上
+					if (shotMove_ == 3) {
+
+						if (collisionFlag_ == 1) {
+							if (tutorialMap[leftTopY_][leftTopX_] == WALL) {
+								if (tutorialMap[leftBottomY_][leftBottomX_] == BACK || tutorialMap[leftBottomY_][leftBottomX_] == PLAYER) {
+									setShotFlag_ = 1;
+								}
+								if (tutorialMap[leftBottomY_][leftBottomX_] == UP) {
+									setShotFlag_ = 1;
+								}
+							}
+							if (tutorialMap[leftTopY_][leftTopX_] == DOWN ||
+								tutorialMap[leftTopY_][leftTopX_] == RIGHT || tutorialMap[leftTopY_][leftTopX_] == LEFT) {
+								setShotFlag_ = 2;
+							}
+
+						}
+
+						if (setShotFlag_ == 1) {
+							shotFlag_ = 0;
+							setShotFlag_ = 0;
+						}
+						if (setShotFlag_ == 2) {
+							setShotFlag_ = 0;
+						}
+
+						if (tutorialMap[leftTopY_][leftTopX_] == WALL) {
+							collisionFlag_ = 1;
+						}
+						else {
+							collisionFlag_ = 0;
+						}
+
+					}
+
+					//下
+					if (shotMove_ == 4) {
+
+
+						if (collisionFlag_ == 1) {
+							if (tutorialMap[leftBottomY_][leftBottomX_] == WALL) {
+								if (tutorialMap[leftTopY_][leftTopX_] == BACK || tutorialMap[leftTopY_][leftTopX_] == PLAYER) {
+									setShotFlag_ = 1;
+								}
+								if (tutorialMap[leftTopY_][leftTopX_] == DOWN) {
+									setShotFlag_ = 1;
+								}
+							}
+
+							if (tutorialMap[leftTopY_][leftTopX_] == UP ||
+								tutorialMap[leftTopY_][leftTopX_] == RIGHT || tutorialMap[leftTopY_][leftTopX_] == LEFT) {
+								setShotFlag_ = 2;
+							}
+						}
+
+						if (setShotFlag_ == 1) {
+							shotFlag_ = 0;
+							setShotFlag_ = 0;
+						}
+						if (setShotFlag_ == 2) {
+							setShotFlag_ = 0;
+						}
+
+						if (tutorialMap[leftBottomY_][leftBottomX_] == WALL) {
+							collisionFlag_ = 1;
+						}
+						else {
+							collisionFlag_ = 0;
+
+						}
+
+					}
+
+
+					//スライド
+					if (shotMove_ == 1) {
+						if (tutorialMap[leftTopY_][leftTopX_ + 1] == UP) {
+							shotMove_ = 3;
+							shotPosX_ = (leftTopX_ + 1) * Size;
+						}
+
+						if (tutorialMap[leftTopY_][leftTopX_ + 1] == RIGHT) {
+							shotMove_ = 2;
+						}
+
+						if (tutorialMap[leftTopY_][leftTopX_ + 1] == LEFT) {
+							shotMove_ = 1;
+						}
+
+						if (tutorialMap[leftTopY_][leftTopX_ + 1] == DOWN) {
+							shotMove_ = 4;
+							shotPosX_ = (leftTopX_ + 1) * Size;
+						}
+					}
+
+					if (shotMove_ == 2) {
+						if (tutorialMap[leftTopY_][leftTopX_] == UP) {
+							shotMove_ = 3;
+						}
+
+						if (tutorialMap[leftTopY_][leftTopX_] == RIGHT) {
+							shotMove_ = 2;
+						}
+
+						if (tutorialMap[leftTopY_][leftTopX_] == LEFT) {
+							shotMove_ = 1;
+						}
+
+						if (tutorialMap[leftTopY_][leftTopX_] == DOWN) {
+							shotMove_ = 4;
+						}
+					}
+
+					if (shotMove_ == 3) {
+						if (tutorialMap[leftTopY_ + 1][leftTopX_] == UP) {
+							shotMove_ = 3;
+						}
+
+						if (tutorialMap[leftTopY_ + 1][leftTopX_] == RIGHT) {
+							shotMove_ = 2;
+							shotPosY_ = (leftTopY_ + 1) * Size;
+						}
+
+						if (tutorialMap[leftTopY_ + 1][leftTopX_] == LEFT) {
+							shotMove_ = 1;
+							shotPosY_ = (leftTopY_ + 1) * Size;
+						}
+
+						if (tutorialMap[leftTopY_ + 1][leftTopX_] == DOWN) {
+							shotMove_ = 4;
+						}
+					}
+
+					if (shotMove_ == 4) {
+
+						if (tutorialMap[leftTopY_][leftTopX_] == UP) {
+
+							shotMove_ = 3;
+
+						}
+
+						if (tutorialMap[leftTopY_][leftTopX_] == RIGHT) {
+
+							shotMove_ = 2;
+
+						}
+
+						if (tutorialMap[leftTopY_][leftTopX_] == LEFT) {
+
+							shotMove_ = 1;
+
+						}
+						if (tutorialMap[leftTopY_ + 1][leftTopX_] == DOWN) {
+
+							shotMove_ = 4;
+
+						}
+					}
+
+				}
+			}
+			if (shotFlag_ == 0) {
+				//左ブロック
+
+				if (mousePosX_ >= selectWX_[0] && mousePosX_ <= selectWX_[0] + selectWR_[0] &&
+					mousePosY_ >= selectWY_[0] && mousePosY_ <= selectWY_[0] + selectWR_[0] && !isWall[0])
+				{
+					selectWColor_[0] = RED;
+				}
+				else
+				{
+					selectWColor_[0] = WHITE;
+				}
+				if (clickFlag_ == 0) {
+					if (selectWColor_[0] == RED && Novice::IsPressMouse(0))
+					{
+						isWall[0] = true;
+						clickFlag_ = 1;
+					}
+				}
+				if (clickFlag_ == 1) {
+					if (isWall[0])
+					{
+						selectWX_[0] = mousePosX_;
+						selectWY_[0] = mousePosY_;
+					}
+
+					// マップとブロックの配置判定
+					if (tutorialMap[leftTY[0]][leftTX[0]] == BACK && isWall[0] && selectWX_[0] <= 960)
+					{
+						backColor_[saveLeftTY[0]][saveLeftTX[0]] = WHITE;
+						backColor_[leftTY[0]][leftTX[0]] = RED;
+						saveLeftTX[0] = leftTX[0];
+						saveLeftTY[0] = leftTY[0];
+					}
+
+					if (Novice::IsPressMouse(1) && backColor_[leftTY[0]][leftTX[0]] == RED && tutorialMap[leftTY[0]][leftTX[0]] == BACK)
+					{
+						tutorialMap[leftTY[0]][leftTX[0]] = LEFT;
+						isWall[0] = false;
+						clickFlag_ = 0;
+						selectWX_[0] = 1085;
+						selectWY_[0] = 165;
+					}
+				}
+				//右ブロック
+				if (mousePosX_ >= selectWX_[1] && mousePosX_ <= selectWX_[1] + selectWR_[1] &&
+					mousePosY_ >= selectWY_[1] && mousePosY_ <= selectWY_[1] + selectWR_[1] && !isWall[1])
+				{
+					selectWColor_[1] = RED;
+				}
+				else
+				{
+					selectWColor_[1] = WHITE;
+				}
+				if (clickFlag_ == 0) {
+					if (selectWColor_[1] == RED && Novice::IsPressMouse(0))
+					{
+						isWall[1] = true;
+						clickFlag_ = 2;
+					}
+				}
+				if (clickFlag_ == 2) {
+					if (isWall[1])
+					{
+						selectWX_[1] = mousePosX_;
+						selectWY_[1] = mousePosY_;
+					}
+					// マップとブロックの配置判定
+					if (tutorialMap[leftTY[1]][leftTX[1]] == BACK && isWall[1] && selectWX_[1] <= 960)
+					{
+						backColor_[saveLeftTY[1]][saveLeftTX[1]] = WHITE;
+						backColor_[leftTY[1]][leftTX[1]] = RED;
+						saveLeftTX[1] = leftTX[1];
+						saveLeftTY[1] = leftTY[1];
+					}
+
+					if (Novice::IsPressMouse(1) && backColor_[leftTY[1]][leftTX[1]] == RED && tutorialMap[leftTY[1]][leftTX[1]] == BACK)
+					{
+						tutorialMap[leftTY[1]][leftTX[1]] = RIGHT;
+						isWall[1] = false;
+						clickFlag_ = 0;
+						selectWX_[1] = 1085;
+						selectWY_[1] = 330;
+					}
+				}
+
+				//下ブロック
+				if (mousePosX_ >= selectWX_[2] && mousePosX_ <= selectWX_[2] + selectWR_[2] &&
+					mousePosY_ >= selectWY_[2] && mousePosY_ <= selectWY_[2] + selectWR_[2] && !isWall[2])
+				{
+					selectWColor_[2] = RED;
+				}
+				else
+				{
+					selectWColor_[2] = WHITE;
+				}
+				if (clickFlag_ == 0) {
+					if (selectWColor_[2] == RED && Novice::IsPressMouse(0))
+					{
+						isWall[2] = true;
+						clickFlag_ = 3;
+					}
+				}
+				if (clickFlag_ == 3) {
+					if (isWall[2])
+					{
+						selectWX_[2] = mousePosX_;
+						selectWY_[2] = mousePosY_;
+					}
+					// マップとブロックの配置判定
+					if (tutorialMap[leftTY[2]][leftTX[2]] == BACK && isWall[2] && selectWX_[2] <= 960)
+					{
+						backColor_[saveLeftTY[2]][saveLeftTX[2]] = WHITE;
+						backColor_[leftTY[2]][leftTX[2]] = RED;
+						saveLeftTX[2] = leftTX[2];
+						saveLeftTY[2] = leftTY[2];
+					}
+
+					if (Novice::IsPressMouse(1) && backColor_[leftTY[2]][leftTX[2]] == RED && tutorialMap[leftTY[2]][leftTX[2]] == BACK)
+					{
+						tutorialMap[leftTY[2]][leftTX[2]] = DOWN;
+						isWall[2] = false;
+						clickFlag_ = 0;
+						selectWX_[2] = 1085;
+						selectWY_[2] = 485;
+					}
+				}
+
+				//上ブロック
+				if (mousePosX_ >= selectWX_[3] && mousePosX_ <= selectWX_[3] + selectWR_[3] &&
+					mousePosY_ >= selectWY_[3] && mousePosY_ <= selectWY_[3] + selectWR_[3] && !isWall[3])
+				{
+					selectWColor_[3] = RED;
+				}
+				else
+				{
+					selectWColor_[3] = WHITE;
+				}
+				if (clickFlag_ == 0) {
+					if (selectWColor_[3] == RED && Novice::IsPressMouse(0))
+					{
+						isWall[3] = true;
+						clickFlag_ = 4;
+					}
+				}
+
+				if (clickFlag_ == 4) {
+					if (isWall[3])
+					{
+						selectWX_[3] = mousePosX_;
+						selectWY_[3] = mousePosY_;
+					}
+					// マップとブロックの配置判定
+					if (tutorialMap[leftTY[3]][leftTX[3]] == BACK && isWall[3] && selectWX_[3] <= 960)
+					{
+						backColor_[saveLeftTY[3]][saveLeftTX[3]] = WHITE;
+						backColor_[leftTY[3]][leftTX[3]] = RED;
+						saveLeftTX[3] = leftTX[3];
+						saveLeftTY[3] = leftTY[3];
+					}
+
+					if (Novice::IsPressMouse(1) && backColor_[leftTY[3]][leftTX[3]] == RED && tutorialMap[leftTY[3]][leftTX[3]] == BACK)
+					{
+						tutorialMap[leftTY[3]][leftTX[3]] = UP;
+						isWall[3] = false;
+						clickFlag_ = 0;
+						selectWX_[3] = 1085;
+						selectWY_[3] = 650;
+					}
+				}
+			}
+
+			// チュートリアルミッション
+			if (tutorialScene_ == 0)
+			{
+				if (countL_ == 1 && countR_ == 1 && countU_ == 1 && countD_ == 1 && shotFlag_ == 0)
+				{
+					isTutorial_ = false;
+				}
+			}
+		}
+	}
 
 	// ステージ1
-	if (stageNo == STAGE1)
+	if(stageNo == STAGE1)
 	{
 		if (shakeFlag_ == 1) {
 			shakeRandX_ = update_;
@@ -1811,21 +2512,25 @@ void GameManager::Update(int stageNo, char keys[256])
 	}
 
 	// 弾操作
-	if (keys[DIK_SPACE]) {
+	if (keys[DIK_SPACE] && isTutorial_) {
 		shotFlag_ = 1;
 	}
 
 	if (shotFlag_ == 1 && shotMove_ == 1) {
 		shotPosX_ -= shotSpead_;
+		countL_ = 1;
 	}
 	if (shotFlag_ == 1 && shotMove_ == 2) {
 		shotPosX_ += shotSpead_;
+		countR_ = 1;
 	}
 	if (shotFlag_ == 1 && shotMove_ == 3) {
 		shotPosY_ -= shotSpead_;
+		countU_ = 1;
 	}
 	if (shotFlag_ == 1 && shotMove_ == 4) {
 		shotPosY_ += shotSpead_;
+		countD_ = 1;
 
 	}
 
@@ -1891,7 +2596,7 @@ void GameManager::Update(int stageNo, char keys[256])
 
 	// リセット
 	if (keys[DIK_R]) {
-		MapReset();
+		MapReset(stageNo);
 	}
 
 	// ゲームクリア処理
@@ -1912,6 +2617,134 @@ void GameManager::Draw(int stageNo)
 {
 	stageNumber = stageNo;
 
+	// チュートリアル
+	if (stageNumber == TUTORIAL)
+	{
+		for (int y = 0; y < mapCountY; y++) {
+			for (int x = 0; x < mapCountX; x++) {
+				// 背景
+				if (tutorialMap[y][x] == BACK) {
+					Novice::DrawSprite(x * Size, y * Size, back, 1, 1, 0, backColor_[y][x]);
+				}
+
+				// 壁
+				if (tutorialMap[y][x] == WALL) {
+					Novice::DrawSprite(x * Size, y * Size, wall, 1, 1, 0, WHITE);
+				}
+			}
+		}
+		if (shakeFlag_ == 1 || shakeFlag_ == 2) {
+			for (int i = 0; i < 8; i++) {
+				if (efectFlag_[i] == 1) {
+					if (efectTimer_ >= 50) {
+						Novice::DrawSprite((int)efectPosX_[i] + 16, (int)efectPosY_[i] + 16, wall, 0.4f, 0.4f, 0, 0xFF00FFFF);
+					}
+				}
+			}
+		}
+		for (int y = 0; y < mapCountY; y++) {
+			for (int x = 0; x < mapCountX; x++) {
+				// プレイヤー
+				if (tutorialMap[y][x] == PLAYER) {
+					Novice::DrawSprite(x * Size, y * Size, player, 2, 2, 0, WHITE);
+				}
+				// 上
+				if (tutorialMap[y][x] == UP) {
+					Novice::DrawSprite(x * Size, y * Size, up, 2, 2, 0, WHITE);
+				}
+				// 下
+				if (tutorialMap[y][x] == DOWN) {
+					Novice::DrawSprite(x * Size, y * Size, down, 2, 2, 0, WHITE);
+				}
+				// 右
+				if (tutorialMap[y][x] == RIGHT) {
+					Novice::DrawSprite(x * Size, y * Size, right, 2, 2, 0, WHITE);
+				}
+				// 左
+				if (tutorialMap[y][x] == LEFT) {
+					Novice::DrawSprite(x * Size, y * Size, left, 2, 2, 0, WHITE);
+				}
+
+				// エネミー
+				if (tutorialMap[y][x] == ENEMY) {
+					Novice::DrawSprite(x * Size - shakeRandX_, y * Size - shakeRandY_, enemy, 1, 1, 0, enemyColor);
+
+				}
+			}
+		}
+		if (shotFlag_ == 0) {
+			// プレイヤーの向き
+			if (shotMove_ == 1) // 左向き
+			{
+				Novice::DrawSprite(savePlayerPosX_ - 64, savePlayerPosY_, leftAllow, 1, 1, 0, WHITE);
+			}
+			if (shotMove_ == 2) // 右向き
+			{
+				Novice::DrawSprite(savePlayerPosX_ + 64, savePlayerPosY_, rightAllow, 1, 1, 0, WHITE);
+			}
+			if (shotMove_ == 3) // 上向き
+			{
+				Novice::DrawSprite(savePlayerPosX_, savePlayerPosY_ - 64, upAllow, 1, 1, 0, WHITE);
+			}
+			if (shotMove_ == 4) // 下向き
+			{
+				Novice::DrawSprite(savePlayerPosX_, savePlayerPosY_ + 64, downAllow, 1, 1, 0, WHITE);
+			}
+		}
+		// 選択欄
+		Novice::DrawSprite(960, 0, panel, 1, 1, 0, WHITE);
+		Novice::DrawSprite(selectWX_[0], selectWY_[0], left, 2, 2, 0, selectWColor_[0]);
+		Novice::DrawSprite(selectWX_[1], selectWY_[1], right, 2, 2, 0, selectWColor_[1]);
+		Novice::DrawSprite(selectWX_[2], selectWY_[2], down, 2, 2, 0, selectWColor_[2]);
+		Novice::DrawSprite(selectWX_[3], selectWY_[3], up, 2, 2, 0, selectWColor_[3]);
+		// チュートリアルテキスト
+		if (!isTutorial_)
+		{
+			if (tutorialScene_ == 0)
+			{
+				if (textCount_ == 0)
+				{
+					Novice::DrawSprite(0, 528, text[0], 1.f, 1.f, 0.f, WHITE);
+				}
+				if (textCount_ == 1)
+				{
+					Novice::DrawSprite(0, 528, text[1], 1.f, 1.f, 0.f, WHITE);
+				}
+				if (textCount_ == 2)
+				{
+					Novice::DrawSprite(0, 528, text[2], 1.f, 1.f, 0.f, WHITE);
+				}
+				if (textCount_ == 3 && countL_ == 1 && countR_ == 1 && countU_ == 1 && countD_ == 1)
+				{
+					Novice::DrawBox(0, 528, 1280, 240, 0.f, WHITE, kFillModeSolid);
+					//Novice::DrawSprite(0, 528, text[0], 1.f, 1.f, 0.f, WHITE);
+				}
+				Novice::DrawSprite(int(menu_.pos.x), int(menu_.pos.y), mission[0], 1.0f, 1.f, 0.0f, WHITE);
+			}
+
+			if (tutorialScene_ == 1)
+			{
+				if (textCount_ == 4)
+				{
+					Novice::DrawBox(0, 528, 1280, 240, 0.f, BLACK, kFillModeSolid);
+					//Novice::DrawSprite(0, 528, text[1], 1.f, 1.f, 0.f, WHITE);
+				}
+				if (textCount_ == 5)
+				{
+					Novice::DrawBox(0, 528, 1280, 240, 0.f, WHITE, kFillModeSolid);
+					//Novice::DrawSprite(0, 528, text[2], 1.f, 1.f, 0.f, WHITE);
+				}
+				Novice::DrawSprite(int(menu_.pos.x), int(menu_.pos.y), mission[0], 1.0f, 1.f, 0.0f, WHITE);
+			}
+
+			if (isOpen_)
+			{
+				Novice::DrawEllipse(sBoxX_, sBoxY_, sBoxR_, sBoxR_, 0.f, BLACK, kFillModeSolid);
+			}
+		}
+	}
+
+	// 本編
 	if (stageNumber == STAGE1) {
 		for (int y = 0; y < mapCountY; y++) {
 			for (int x = 0; x < mapCountX; x++) {
@@ -1986,6 +2819,10 @@ void GameManager::Draw(int stageNo)
 		}
 		// 選択欄
 		Novice::DrawSprite(960, 0, panel, 1, 1, 0, WHITE);
+		Novice::DrawSprite(selectWX_[0], selectWY_[0], left, 2, 2, 0, selectWColor_[0]);
+		Novice::DrawSprite(selectWX_[1], selectWY_[1], right, 2, 2, 0, selectWColor_[1]);
+		Novice::DrawSprite(selectWX_[2], selectWY_[2], down, 2, 2, 0, selectWColor_[2]);
+		Novice::DrawSprite(selectWX_[3], selectWY_[3], up, 2, 2, 0, selectWColor_[3]);
 	}
 
 	if (stageNumber == STAGE2) {
@@ -2060,7 +2897,10 @@ void GameManager::Draw(int stageNo)
 		}
 		// 選択欄
 		Novice::DrawSprite(960, 0, panel, 1, 1, 0, WHITE);
-
+		Novice::DrawSprite(selectWX_[0], selectWY_[0], left, 2, 2, 0, selectWColor_[0]);
+		Novice::DrawSprite(selectWX_[1], selectWY_[1], right, 2, 2, 0, selectWColor_[1]);
+		Novice::DrawSprite(selectWX_[2], selectWY_[2], down, 2, 2, 0, selectWColor_[2]);
+		Novice::DrawSprite(selectWX_[3], selectWY_[3], up, 2, 2, 0, selectWColor_[3]);
 	}
 
 	if (stageNumber == STAGE3) {
@@ -2136,51 +2976,58 @@ void GameManager::Draw(int stageNo)
 
 		// 選択欄
 		Novice::DrawSprite(960, 0, panel, 1, 1, 0, WHITE);
-
+		Novice::DrawSprite(selectWX_[0], selectWY_[0], left, 2, 2, 0, selectWColor_[0]);
+		Novice::DrawSprite(selectWX_[1], selectWY_[1], right, 2, 2, 0, selectWColor_[1]);
+		Novice::DrawSprite(selectWX_[2], selectWY_[2], down, 2, 2, 0, selectWColor_[2]);
+		Novice::DrawSprite(selectWX_[3], selectWY_[3], up, 2, 2, 0, selectWColor_[3]);
 	}
 
 	//Novice::ScreenPrintf(1000, 0, "map[%d][%d]", leftTY, leftTX);
 	//Novice::ScreenPrintf(1000, 20, "saveMap[%d][%d]", saveLeftTY, saveLeftTX);
 
-	Novice::ScreenPrintf(1000, 40, "laserMove : %d", shotMove_);
-	Novice::ScreenPrintf(1000, 60, "colision : %d", collisionFlag_);
-	Novice::ScreenPrintf(1000, 80, "randsave : %d", randSave[1]);
-	Novice::ScreenPrintf(1000, 100, "LEFT,RIGHT,DOWN,UP");
-	Novice::ScreenPrintf(1000, 120, "saveFlag : %d", saveFlag_);
-	Novice::ScreenPrintf(1000, 140, "efectTimer : %d", efectTimer_);
-	Novice::ScreenPrintf(1000, 160, "color : %d", enemyColor);
-	Novice::ScreenPrintf(1000, 260, "update : %d", update_);
-
-	Novice::ScreenPrintf(1000, 220, "efectX : %d", efectPosX_[0]);
-	Novice::ScreenPrintf(1000, 240, "efectY : %f", efectPosY_[0]);
-	Novice::ScreenPrintf(1000, 200, "velo : %f", efectVelocity_[0]);
-	Novice::ScreenPrintf(1000, 180, "acc : %f", efectAcceleration_[0]);
-	for (int i = 0; i < 4; i++) {
-		Novice::DrawBox(selectWX_[i], selectWY_[i], selectWR_[i], selectWR_[i], 0.f, selectWColor_[i], kFillModeSolid);
-	}
-	Novice::DrawSprite(selectWX_[0], selectWY_[0], left, 2, 2, 0, selectWColor_[0]);
-	Novice::DrawSprite(selectWX_[1], selectWY_[1], right, 2, 2, 0, selectWColor_[1]);
-	Novice::DrawSprite(selectWX_[2], selectWY_[2], down, 2, 2, 0, selectWColor_[2]);
-	Novice::DrawSprite(selectWX_[3], selectWY_[3], up, 2, 2, 0, selectWColor_[3]);
 	if (shotFlag_ == 1) {
 		Novice::DrawSprite(shotPosX_, shotPosY_, wall, 1.0f, 1.0f, 0.0f, GREEN);
 
 	}
 
+	Novice::ScreenPrintf(0, 0, "flagOut : %d", flagOut_);
+	Novice::ScreenPrintf(0, 20, "flagIn : %d", flagIn_);
+
 }
 
-void GameManager::MapReset()
+void GameManager::MapReset(int stageNo)
 {
 	// リセット
 	for (int y = 0; y < mapCountY; y++) {
 		for (int x = 0; x < mapCountX; x++) {
 
+			// チュートリアル
+			if (stageNo == TUTORIAL)
+			{
+				if (tutorialScene_ == 0)
+				{
+					tutorialMap[y][x] = tutorialMapInitialize[y][x];
+				}
+				if (tutorialScene_ == 1)
+				{
+					tutorialMap[y][x] = tutorialMapInitialize2[y][x];
+				}
+			}
 			// ステージ１
-			map0[y][x] = initializeMap0[y][x];
+			if (stageNo == STAGE1)
+			{
+				map0[y][x] = initializeMap0[y][x];
+			}
 			// ステージ２
-			map1[y][x] = initializeMap1[y][x];
+			if (stageNo == STAGE2)
+			{
+			    map1[y][x] = initializeMap1[y][x];
+			}
 			// ステージ３
-			map2[y][x] = initializeMap2[y][x];
+			if (stageNo == STAGE3)
+			{
+				map2[y][x] = initializeMap2[y][x];
+			}
 
 			backColor_[y][x] = WHITE;
 		}

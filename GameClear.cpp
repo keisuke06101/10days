@@ -116,8 +116,6 @@ void GameClear::Draw()
 		Novice::DrawEllipse(sBoxX_, sBoxY_, sBoxR_, sBoxR_, sBoxRotate_, BLACK, kFillModeSolid);
 	}
 
-	Novice::ScreenPrintf(1000, 720, "flagOut : %d", flagOut_);
-	Novice::ScreenPrintf(1000, 740, "flagIn : %d", flagIn_);
 	Novice::ScreenPrintf(1000, 760, "isClose : %d", isClose_);
 
 }

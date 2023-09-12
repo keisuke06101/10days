@@ -2,7 +2,6 @@
 
 void StageSelect::Initialize()
 {
-	stageNo_ = 0;
 	isGameStart_ = false;
 
 	// テクスチャロード
@@ -10,11 +9,29 @@ void StageSelect::Initialize()
 	stage2_ = Novice::LoadTexture("./Resource/images/stage2.png");
 	stage3_ = Novice::LoadTexture("./Resource/images/stage3.png");
 	tutorial_ = Novice::LoadTexture("./Resource/images/tutorial.png");
+
+	gameClear_ = new GameClear;
+	gameClear_->Initialize();
 }
 
 void StageSelect::Update()
 {
 	Novice::GetMousePosition(&mousePosX_, &mousePosY_);
+
+	// チュートリアルを選択する処理
+	if (mousePosX_ >= selectTutorialX_ && mousePosX_ <= selectTutorialX_ + selectTW_ && mousePosY_ >= selectTutorialY_ && mousePosY_ <= selectTutorialY_ + selectTH_)
+	{
+		selectTutorialColor_ = RED;
+		if (selectTutorialColor_ = RED && Novice::IsPressMouse(0))
+		{
+			stageNo_ = 0;
+			isGameStart_ = true;
+		}
+	}
+	else
+	{
+		selectTutorialColor_ = WHITE;
+	}
 
 	// ステージ１を選択する処理
 	if (mousePosX_ >= selectST1X_ && mousePosX_ <= selectST1X_ + selectW_ && mousePosY_ >= selectST1Y_ && mousePosY_ <= selectST1Y_ + selectH_)
@@ -61,31 +78,22 @@ void StageSelect::Update()
 		selectST3Color_ = WHITE;
 	}
 
-	// チュートリアルを選択する処理
-	if (mousePosX_ >= selectTutorialX_ && mousePosX_ <= selectTutorialX_ + selectTW_ && mousePosY_ >= selectTutorialY_ && mousePosY_ <= selectTutorialY_ + selectTH_)
+	// シーン遷移
+	if (isGameStart_)
 	{
-		selectTutorialColor_ = RED;
-		if (selectTutorialColor_ = RED && Novice::IsPressMouse(0))
-		{
-			stageNo_ = 0;
-			isGameStart_ = true;
-		}
-	}
-	else
-	{
-		selectTutorialColor_ = WHITE;
+		gameClear_->SetOpen(true);
 	}
 
 }
 
 void StageSelect::Draw()
 {
+	// チュートリアル
+	Novice::DrawSprite(selectTutorialX_, selectTutorialY_, tutorial_, 1.f, 1.f, 0.0f, selectTutorialColor_);
 	// ステージ１
 	Novice::DrawSprite(selectST1X_, selectST1Y_, stage1_, 1.f, 1.f, 0.0f, selectST1Color_);
 	// ステージ２
 	Novice::DrawSprite(selectST2X_, selectST2Y_, stage2_, 1.f, 1.f, 0.0f, selectST2Color_);
 	// ステージ３
 	Novice::DrawSprite(selectST3X_, selectST3Y_, stage3_, 1.f, 1.f, 0.0f, selectST3Color_);
-	// チュートリアル
-	Novice::DrawSprite(selectTutorialX_, selectTutorialY_, tutorial_, 1.f, 1.f, 0.0f, selectTutorialColor_);
 }
