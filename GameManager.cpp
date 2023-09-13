@@ -3368,7 +3368,7 @@ void GameManager::Draw(int stageNo)
 				}
 			}
 		}
-
+		Novice::DrawSprite(0, 0, Novice::LoadTexture("./Resource/images/rText.png"), 1.f, 1.f, 0.f, WHITE);
 		for (int y = 0; y < mapCountY; y++) {
 			for (int x = 0; x < mapCountX; x++) {
 				// プレイヤー
@@ -3509,7 +3509,7 @@ void GameManager::Draw(int stageNo)
 				}
 			}
 		}
-
+		Novice::DrawSprite(0, 0, Novice::LoadTexture("./Resource/images/rText.png"), 1.f, 1.f, 0.f, WHITE);
 		for (int y = 0; y < mapCountY; y++) {
 			for (int x = 0; x < mapCountX; x++) {
 				// プレイヤー
@@ -3592,7 +3592,7 @@ void GameManager::Draw(int stageNo)
 				}
 			}
 		}
-
+		Novice::DrawSprite(0, 0, Novice::LoadTexture("./Resource/images/rText.png"), 1.f, 1.f, 0.f, WHITE);
 		for (int y = 0; y < mapCountY; y++) {
 			for (int x = 0; x < mapCountX; x++) {
 				// プレイヤー
@@ -3688,7 +3688,7 @@ void GameManager::Draw(int stageNo)
 				}
 			}
 		}
-
+		Novice::DrawSprite(0, 0, Novice::LoadTexture("./Resource/images/rText.png"), 1.f, 1.f, 0, WHITE);
 		for (int y = 0; y < mapCountY; y++) {
 			for (int x = 0; x < mapCountX; x++) {
 				// プレイヤー
