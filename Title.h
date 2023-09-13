@@ -38,6 +38,17 @@ private:
 	int titleBack_ = 0;
 	int start_ = 0;
 
+	//ミュージック
+	const int audioHandle_[2]
+	{
+		Novice::LoadAudio("./Resource/music/select.wav"),	  // セレクト
+		Novice::LoadAudio("./Resource/music/start.wav"),      // 決定
+	};
+	int voiceHandle_[2]
+	{
+		-1,-1
+	};
+
 	// タイトルアニメーション
 
 	int titleScrX_ = 0;

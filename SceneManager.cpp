@@ -34,7 +34,7 @@ void SceneManager::Update(char* keys, char* preKeys)
 		{
 			sceneNo_ = StageSelectScene;
 			gameManager_->Initialize(stageSelect_->GetStageNo());
-			
+			Novice::StopAudio(voiceHandle_[0]);
 		}
 		break;
 
@@ -54,6 +54,7 @@ void SceneManager::Update(char* keys, char* preKeys)
 			gameManager_->Initialize(stageSelect_->GetStageNo());
 			gameManager_->InitializeTutorial();
 			sceneNo_ = Game;
+			Novice::StopAudio(voiceHandle_[2]);
 		}
 
 		break;
@@ -69,6 +70,8 @@ void SceneManager::Update(char* keys, char* preKeys)
 			sceneNo_ = StageSelectScene;
 			stageSelect_->Initialize();
 			gameManager_->GetGameClear()->Initialize();
+			Novice::StopAudio(voiceHandle_[1]);
+			Novice::StopAudio(voiceHandle_[3]);
 		}
 		if (gameManager_->GetGameClear()->SelectL() && gameManager_->GetGameClear()->GetRad() >= 1400) {
 			gameManager_->InitializeTutorial();
@@ -120,22 +123,34 @@ void SceneManager::Draw()
 		
 		title_->Draw();
 
-		title_->GetGameClear()->Draw();
+		title_->GetGameClear()->Draw(title_->GetGameClear()->GetFIn());
+
+		//タイトルBGM
+		if (Novice::IsPlayingAudio(voiceHandle_[0]) == 0 || voiceHandle_[0] == -1)
+		{
+			voiceHandle_[0] = Novice::PlayAudio(audioHandle_[0], 0, 0.1f);
+		}
 
 		break;
 
 	case StageSelectScene:
 		
+		//ステージセレクトBGM
+		if (Novice::IsPlayingAudio(voiceHandle_[2]) == 0 || voiceHandle_[0] == -1)
+		{
+			voiceHandle_[2] = Novice::PlayAudio(audioHandle_[2], 0, 0.1f);
+		}
+
 		stageSelect_->Draw();
 
 		// シーン遷移描画
-		gameManager_->GetGameClear()->Draw();
+		gameManager_->GetGameClear()->Draw(gameManager_->GetGameClear()->GetFIn());
 
 		gameManager_->GetGameOver()->Draw();
 
-		title_->GetGameClear()->Draw();
+		title_->GetGameClear()->Draw(title_->GetGameClear()->GetFIn());
 
-		stageSelect_->GetGameClear()->Draw();
+		stageSelect_->GetGameClear()->Draw(stageSelect_->GetGameClear()->GetFIn());
 
 		break;
 
@@ -144,11 +159,28 @@ void SceneManager::Draw()
 
 		gameManager_->Draw(stageSelect_->GetStageNo());
 
-		gameManager_->GetGameClear()->Draw();
+		gameManager_->GetGameClear()->Draw(gameManager_->GetGameClear()->GetFIn());
 		
 		gameManager_->GetGameOver()->Draw();
 
-		stageSelect_->GetGameClear()->Draw();
+		stageSelect_->GetGameClear()->Draw(stageSelect_->GetGameClear()->GetFIn());
+
+		if (stageSelect_->GetStageNo() != 0)
+		{
+			//ステージセレクトBGM
+			if (Novice::IsPlayingAudio(voiceHandle_[1]) == 0 || voiceHandle_[1] == -1)
+			{
+				voiceHandle_[1] = Novice::PlayAudio(audioHandle_[1], 0, 0.1f);
+			}
+		}
+		if (stageSelect_->GetStageNo() == 0)
+		{
+			//チュートリアルBGM
+			if (Novice::IsPlayingAudio(voiceHandle_[3]) == 0 || voiceHandle_[3] == -1)
+			{
+				voiceHandle_[3] = Novice::PlayAudio(audioHandle_[3], 0, 0.1f);
+			}
+		}
 
 		break;
 

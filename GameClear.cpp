@@ -73,9 +73,58 @@ void GameClear::Update(bool flagIn)
 	{
 		selectL_ = true;
 		flagOut_ = true;
+		Novice::StopAudio(voiceClearHandle_);
 	}
 	if (boxColorR_ == BLUE && Novice::IsPressMouse(0) && !selectL_ && flame_ >= 80)
 	{
+		selectR_ = true;
+		flagOut_ = true;
+		Novice::StopAudio(voiceClearHandle_);
+	}
+
+	if (mousePosX_ >= menu_.pos.x + 125 && mousePosX_ <= menu_.pos.x + 125 + menuW_ - 725 && mousePosY_ >= menu_.pos.y + 250 && mousePosY_ <= menu_.pos.y + 250 + menuH_ - 400)
+	{
+		boxColorL_ = BLUE;
+		if (Novice::IsPlayingAudio(voiceHandle_[0]) == 0 || voiceHandle_[0] == -1)
+		{
+			voiceHandle_[0] = Novice::PlayAudio(audioHandle_[0], 0, 0.1f);
+		}
+	}
+	else
+	{
+		boxColorL_ = WHITE;
+		Novice::StopAudio(voiceHandle_[0]);
+	}
+
+	if (mousePosX_ >= menu_.pos.x + 605 && mousePosX_ <= menu_.pos.x + 605 + menuW_ - 725 && mousePosY_ >= menu_.pos.y + 250 && mousePosY_ <= menu_.pos.y + 250 + menuH_ - 400)
+	{
+		boxColorR_ = BLUE;
+		if (Novice::IsPlayingAudio(voiceHandle_[1]) == 0 || voiceHandle_[1] == -1)
+		{
+			voiceHandle_[1] = Novice::PlayAudio(audioHandle_[1], 0, 0.1f);
+		}
+	}
+	else
+	{
+		boxColorR_ = WHITE;
+		Novice::StopAudio(voiceHandle_[1]);
+	}
+
+	if (boxColorL_ == BLUE && Novice::IsPressMouse(0) && !selectR_ && flame_ >= 80)
+	{
+		if (Novice::IsPlayingAudio(voiceHandle_[2]) == 0 || voiceHandle_[2] == -1)
+		{
+			voiceHandle_[2] = Novice::PlayAudio(audioHandle_[2], 0, 0.1f);
+		}
+		selectL_ = true;
+		flagOut_ = true;
+	}
+	if (boxColorR_ == BLUE && Novice::IsPressMouse(0) && !selectL_ && flame_ >= 80)
+	{
+		if (Novice::IsPlayingAudio(voiceHandle_[2]) == 0 || voiceHandle_[2] == -1)
+		{
+			voiceHandle_[2] = Novice::PlayAudio(audioHandle_[2], 0, 0.1f);
+		}
 		selectR_ = true;
 		flagOut_ = true;
 	}
@@ -102,9 +151,9 @@ void GameClear::Update(bool flagIn)
 
 }
 
-void GameClear::Draw()
+void GameClear::Draw(bool flagIn)
 {
-
+	flagIn_ = flagIn;
 	Novice::DrawBox(int(menu_.pos.x), int(menu_.pos.y), int(menuW_ * scale), int(menuH_ * scale), 0.0f, WHITE, kFillModeSolid);
 	Novice::DrawSprite(int(menu_.pos.x), int(menu_.pos.y), gameClear_, 0.782f, 0.84f, 0.0f, WHITE);
 
@@ -118,8 +167,14 @@ void GameClear::Draw()
 	{
 		Novice::DrawEllipse(sBoxX_, sBoxY_, sBoxR_, sBoxR_, sBoxRotate_, BLACK, kFillModeSolid);
 	}
-
-	Novice::ScreenPrintf(1000, 760, "isClose : %d", isClose_);
+	if (flagIn_)
+	{
+		//ゲームクリアBGM
+		if (Novice::IsPlayingAudio(voiceClearHandle_) == 0 || voiceClearHandle_ == -1)
+		{
+			voiceClearHandle_ = Novice::PlayAudio(audioClear_, 0, 0.3f);
+		}
+	}
 
 }
 

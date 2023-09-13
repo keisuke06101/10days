@@ -67,6 +67,56 @@ private:
 	int stage2_ = 0;
 	int stage3_ = 0;
 	int tutorial_ = 0;
+	// テクスチャ
+	int BG_ = 0;
+
+	int stage1 = 0;
+	int stage2 = 0;
+	int stage3 = 0;
+	int tutorial = 0;
+
+	int selectStage1_ = 0;
+	int selectStage2_ = 0;
+	int selectStage3_ = 0;
+	int selectTutorial_ = 0;
+
+	//ミュージック
+	const int audioHandle1_[2]
+	{
+		Novice::LoadAudio("./Resource/music/select.wav"),
+	    Novice::LoadAudio("./Resource/music/start.wav")
+	};
+	int voiceHandle1_[2]
+	{
+		-1,-1
+	};
+	const int audioHandle2_[2]
+	{
+		Novice::LoadAudio("./Resource/music/select.wav"),
+		Novice::LoadAudio("./Resource/music/start.wav")
+	};
+	int voiceHandle2_[2]
+	{
+		-1,-1
+	};
+	const int audioHandle3_[2]
+	{
+		Novice::LoadAudio("./Resource/music/select.wav"),
+		Novice::LoadAudio("./Resource/music/start.wav")
+	};
+	int voiceHandle3_[2]
+	{
+		-1,-1
+	};
+	const int audioHandle4_[2]
+	{
+		Novice::LoadAudio("./Resource/music/select.wav"),
+		Novice::LoadAudio("./Resource/music/start.wav")
+	};
+	int voiceHandle4_[2]
+	{
+		-1,-1
+	};
 
 	GameClear* gameClear_ = nullptr;
 };
